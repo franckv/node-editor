@@ -1,7 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::math::MathNode;
-use crate::node::NodeView;
+use crate::node::{math::MathNode, NodeView};
 
 #[derive(Clone, Default, Debug)]
 pub struct FloatNode {
@@ -16,20 +15,22 @@ impl FloatNode {
     pub fn value_mut(&mut self) -> &mut f32 {
         &mut self.value
     }
+}
 
-    pub fn title() -> String {
+impl NodeView<MathNode> for FloatNode {
+    fn title(&self) -> String {
         "Float".to_string()
     }
 
-    pub fn inputs() -> usize {
+    fn inputs(&self) -> usize {
         0
     }
 
-    pub fn outputs() -> usize {
+    fn outputs(&self) -> usize {
         1
     }
 
-    pub fn connect(other: &MathNode) -> bool {
+    fn connect(&self, other: &MathNode) -> bool {
         match other {
             MathNode::Output(_) => true,
             MathNode::BinOp(_) => true,
@@ -37,24 +38,28 @@ impl FloatNode {
         }
     }
 
-    pub fn has_body() -> bool {
+    fn has_body(&self) -> bool {
         false
     }
 
-    pub fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
         unimplemented!();
     }
 
-    pub fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<MathNode>) -> PinInfo {
+    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<MathNode>) -> PinInfo {
         unimplemented!();
     }
 
-    pub fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
         ui.add(egui::DragValue::new(self.value_mut()));
         if remotes.len() > 0 {
             MathNode::get_pin_float_connected()
         } else {
             MathNode::get_pin_float_disconnected()
         }
+    }
+
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<MathNode> {
+        unimplemented!();
     }
 }

@@ -11,7 +11,5 @@ pub trait NodeView<T> {
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
     fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<T>) -> PinInfo;
     fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<T>) -> PinInfo;
-    fn get_pin_float_disconnected() -> PinInfo;
-    fn get_pin_float_connected() -> PinInfo;
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<T>;
 }

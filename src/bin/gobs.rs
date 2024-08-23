@@ -103,5 +103,5 @@ fn main() {
 
     tracing::info!("Engine start");
 
-    Application::<App>::new("Egui", 1024, 768).run();
+    Application::<App>::new("NodeUI", 1024, 768).run();
 }

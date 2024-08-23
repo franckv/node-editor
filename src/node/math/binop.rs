@@ -39,20 +39,22 @@ impl BinOpNode {
             }
         }
     }
+}
 
-    pub fn title() -> String {
+impl NodeView<MathNode> for BinOpNode {
+    fn title(&self) -> String {
         "Binary Op".to_string()
     }
 
-    pub fn inputs() -> usize {
+    fn inputs(&self) -> usize {
         2
     }
 
-    pub fn outputs() -> usize {
+    fn outputs(&self) -> usize {
         1
     }
 
-    pub fn connect(other: &MathNode) -> bool {
+    fn connect(&self, other: &MathNode) -> bool {
         match other {
             MathNode::Output(_) => true,
             MathNode::BinOp(_) => true,
@@ -60,11 +62,11 @@ impl BinOpNode {
         }
     }
 
-    pub fn has_body() -> bool {
+    fn has_body(&self) -> bool {
         true
     }
 
-    pub fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
         egui::ComboBox::from_label("")
             .selected_text(format!("{:?}", self.op))
             .show_ui(ui, |ui| {
@@ -75,12 +77,7 @@ impl BinOpNode {
             });
     }
 
-    pub fn show_input(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<MathNode>,
-    ) -> PinInfo {
+    fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<MathNode>) -> PinInfo {
         if remotes.len() == 0 {
             ui.label("None");
             MathNode::get_pin_float_disconnected()
@@ -101,12 +98,16 @@ impl BinOpNode {
         }
     }
 
-    pub fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
         ui.label(MathNode::format_float(self.value()));
         if remotes.len() > 0 {
             MathNode::get_pin_float_connected()
         } else {
             MathNode::get_pin_float_disconnected()
         }
+    }
+
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<MathNode> {
+        unimplemented!();
     }
 }

@@ -18,44 +18,54 @@ pub enum MathNode {
     BinOp(BinOpNode),
 }
 
+impl MathNode {
+    fn get_pin_float_disconnected() -> PinInfo {
+        PinInfo::circle().with_fill(Color32::RED)
+    }
+
+    fn get_pin_float_connected() -> PinInfo {
+        PinInfo::circle().with_fill(Color32::GREEN)
+    }
+}
+
 impl NodeView<MathNode> for MathNode {
     fn title(&self) -> String {
         match self {
-            MathNode::Output(_) => OutputNode::title(),
-            MathNode::Float(_) => FloatNode::title(),
-            MathNode::BinOp(_) => BinOpNode::title(),
+            MathNode::Output(value) => value.title(),
+            MathNode::Float(value) => value.title(),
+            MathNode::BinOp(value) => value.title(),
         }
     }
 
     fn inputs(&self) -> usize {
         match self {
-            MathNode::Output(_) => OutputNode::inputs(),
-            MathNode::Float(_) => FloatNode::inputs(),
-            MathNode::BinOp(_) => BinOpNode::inputs(),
+            MathNode::Output(value) => value.inputs(),
+            MathNode::Float(value) => value.inputs(),
+            MathNode::BinOp(value) => value.inputs(),
         }
     }
 
     fn outputs(&self) -> usize {
         match self {
-            MathNode::Output(_) => OutputNode::outputs(),
-            MathNode::Float(_) => FloatNode::outputs(),
-            MathNode::BinOp(_) => BinOpNode::outputs(),
+            MathNode::Output(value) => value.outputs(),
+            MathNode::Float(value) => value.outputs(),
+            MathNode::BinOp(value) => value.outputs(),
         }
     }
 
     fn connect(&self, other: &MathNode) -> bool {
         match self {
-            MathNode::Output(_) => OutputNode::connect(other),
-            MathNode::Float(_) => FloatNode::connect(other),
-            MathNode::BinOp(_) => BinOpNode::connect(other),
+            MathNode::Output(value) => value.connect(other),
+            MathNode::Float(value) => value.connect(other),
+            MathNode::BinOp(value) => value.connect(other),
         }
     }
 
     fn has_body(&self) -> bool {
         match self {
-            MathNode::Output(_) => OutputNode::has_body(),
-            MathNode::Float(_) => FloatNode::has_body(),
-            MathNode::BinOp(_) => BinOpNode::has_body(),
+            MathNode::Output(value) => value.has_body(),
+            MathNode::Float(value) => value.has_body(),
+            MathNode::BinOp(value) => value.has_body(),
         }
     }
 
@@ -81,14 +91,6 @@ impl NodeView<MathNode> for MathNode {
             MathNode::Float(value) => value.show_output(ui, remotes),
             MathNode::BinOp(value) => value.show_output(ui, remotes),
         }
-    }
-
-    fn get_pin_float_disconnected() -> PinInfo {
-        PinInfo::circle().with_fill(Color32::RED)
-    }
-
-    fn get_pin_float_connected() -> PinInfo {
-        PinInfo::circle().with_fill(Color32::GREEN)
     }
 
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<MathNode> {
