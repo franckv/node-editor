@@ -10,11 +10,9 @@ pub struct NodeUI {
 
 impl NodeUI {
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
-        egui::Window::new("NodeUI")
-            .min_size([800., 600.])
-            .show(ectx, |ui| {
-                self.snarl
-                    .show(&mut NodeViewer, &self.style, egui::Id::new("snarl"), ui);
-            });
+        egui::CentralPanel::default().show(ectx, |ui| {
+            self.snarl
+                .show(&mut NodeViewer, &self.style, egui::Id::new("snarl"), ui);
+        });
     }
 }
