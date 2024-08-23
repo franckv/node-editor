@@ -1,6 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{math::Node, NodeValue, NodeView};
+use crate::node::{math::Node, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct ComposeNode {
@@ -58,24 +58,20 @@ impl ComposeNode {
     }
 }
 
+const INPUTS: [NodeValueType; 2] = [NodeValueType::F32, NodeValueType::F32];
+const OUTPUTS: [NodeValueType; 1] = [NodeValueType::Vec2];
+
 impl NodeView<Node> for ComposeNode {
     fn title(&self) -> String {
         "Compose".to_string()
     }
 
-    fn inputs(&self) -> usize {
-        2
+    fn inputs(&self) -> &[NodeValueType] {
+        &INPUTS
     }
 
-    fn outputs(&self) -> usize {
-        1
-    }
-
-    fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
-        match other {
-            Node::Output(_) => true,
-            _ => false,
-        }
+    fn outputs(&self) -> &[NodeValueType] {
+        &OUTPUTS
     }
 
     fn has_body(&self) -> bool {

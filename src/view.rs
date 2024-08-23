@@ -1,7 +1,7 @@
 use egui::{Pos2, Ui};
 use egui_snarl::{ui::SnarlViewer, InPin, NodeId, OutPin, Snarl};
 
-use crate::node::NodeView;
+use crate::node::{NodeValueType, NodeView};
 
 pub struct NodeViewer;
 
@@ -39,7 +39,10 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let output = &snarl[from.id.node];
         let input = &snarl[to.id.node];
 
-        if output.connect(from.id.output, input, to.id.input) {
+        let out_type = output.outputs()[from.id.output];
+        let in_type = input.inputs()[to.id.input];
+
+        if in_type == NodeValueType::Any || in_type == out_type {
             for &remote in &to.remotes {
                 snarl.disconnect(remote, to.id);
             }
@@ -49,11 +52,11 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
     }
 
     fn outputs(&mut self, node: &T) -> usize {
-        node.outputs()
+        node.outputs().len()
     }
 
     fn inputs(&mut self, node: &T) -> usize {
-        node.inputs()
+        node.inputs().len()
     }
 
     fn show_input(

@@ -8,7 +8,7 @@ mod float;
 pub use binop::BinOpNode;
 pub use float::FloatNode;
 
-use crate::node::NodeView;
+use crate::node::{NodeValueType, NodeView};
 use camera::CameraPositionNode;
 
 type Node = FragmentNode;
@@ -55,7 +55,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> usize {
+    fn inputs(&self) -> &[NodeValueType] {
         match self {
             Node::Float(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
@@ -63,19 +63,11 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> usize {
+    fn outputs(&self) -> &[NodeValueType] {
         match self {
             Node::Float(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),
             Node::CameraPosition(value) => value.outputs(),
-        }
-    }
-
-    fn connect(&self, index: usize, other: &Node, other_index: usize) -> bool {
-        match self {
-            Node::Float(value) => value.connect(index, other, other_index),
-            Node::BinOp(value) => value.connect(index, other, other_index),
-            Node::CameraPosition(value) => value.connect(index, other, other_index),
         }
     }
 

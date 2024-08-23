@@ -6,9 +6,8 @@ pub mod math;
 
 pub trait NodeView<T> {
     fn title(&self) -> String;
-    fn inputs(&self) -> usize;
-    fn outputs(&self) -> usize;
-    fn connect(&self, index: usize, other: &T, other_index: usize) -> bool;
+    fn inputs(&self) -> &[NodeValueType];
+    fn outputs(&self) -> &[NodeValueType];
     fn has_body(&self) -> bool;
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
     fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<(usize, T)>)
@@ -22,6 +21,14 @@ pub trait NodeView<T> {
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<T>;
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum NodeValueType {
+    F32,
+    Vec2,
+    Vec3,
+    Any,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum NodeValue {
     F32(f32),
@@ -30,6 +37,14 @@ pub enum NodeValue {
 }
 
 impl NodeValue {
+    fn _ty(self) -> NodeValueType {
+        match self {
+            NodeValue::F32(_) => NodeValueType::F32,
+            NodeValue::Vec2(_) => NodeValueType::Vec2,
+            NodeValue::Vec3(_) => NodeValueType::Vec3,
+        }
+    }
+
     fn format_float(value: f32) -> String {
         format!("{}", (value * 100.).round() / 100.)
     }

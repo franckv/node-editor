@@ -1,6 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{math::Node, NodeValue, NodeView};
+use crate::node::{math::Node, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct Vec2Node {
@@ -32,26 +32,20 @@ impl Vec2Node {
     }
 }
 
+const INPUTS: [NodeValueType; 0] = [];
+const OUTPUTS: [NodeValueType; 3] = [NodeValueType::F32, NodeValueType::F32, NodeValueType::Vec2];
+
 impl NodeView<Node> for Vec2Node {
     fn title(&self) -> String {
         "Vec2".to_string()
     }
 
-    fn inputs(&self) -> usize {
-        0
+    fn inputs(&self) -> &[NodeValueType] {
+        &INPUTS
     }
 
-    fn outputs(&self) -> usize {
-        3
-    }
-
-    fn connect(&self, index: usize, other: &Node, _: usize) -> bool {
-        match other {
-            Node::Output(_) => true,
-            Node::BinOp(_) => index < 2,
-            Node::Compose(_) => index < 2,
-            _ => false,
-        }
+    fn outputs(&self) -> &[NodeValueType] {
+        &OUTPUTS
     }
 
     fn has_body(&self) -> bool {

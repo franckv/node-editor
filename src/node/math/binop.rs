@@ -1,7 +1,7 @@
 use egui_snarl::ui::PinInfo;
 
 use crate::node::math::Node;
-use crate::node::{NodeValue, NodeView};
+use crate::node::{NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub enum Ops {
@@ -69,26 +69,20 @@ impl BinOpNode {
     }
 }
 
+const INPUTS: [NodeValueType; 2] = [NodeValueType::F32, NodeValueType::F32];
+const OUTPUTS: [NodeValueType; 1] = [NodeValueType::F32];
+
 impl NodeView<Node> for BinOpNode {
     fn title(&self) -> String {
         "Binary Op".to_string()
     }
 
-    fn inputs(&self) -> usize {
-        2
+    fn inputs(&self) -> &[NodeValueType] {
+        &INPUTS
     }
 
-    fn outputs(&self) -> usize {
-        1
-    }
-
-    fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
-        match other {
-            Node::Output(_) => true,
-            Node::BinOp(_) => true,
-            Node::Compose(_) => true,
-            _ => false,
-        }
+    fn outputs(&self) -> &[NodeValueType] {
+        &OUTPUTS
     }
 
     fn has_body(&self) -> bool {

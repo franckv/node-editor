@@ -1,26 +1,25 @@
 use egui_snarl::ui::PinInfo;
 
 use crate::node::math::Node;
-use crate::node::NodeView;
+use crate::node::{NodeValueType, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct OutputNode;
+
+const INPUTS: [NodeValueType; 1] = [NodeValueType::Any];
+const OUTPUTS: [NodeValueType; 0] = [];
 
 impl NodeView<Node> for OutputNode {
     fn title(&self) -> String {
         "Output".to_string()
     }
 
-    fn inputs(&self) -> usize {
-        1
+    fn inputs(&self) -> &[NodeValueType] {
+        &INPUTS
     }
 
-    fn outputs(&self) -> usize {
-        0
-    }
-
-    fn connect(&self, _: usize, _: &Node, _: usize) -> bool {
-        false
+    fn outputs(&self) -> &[NodeValueType] {
+        &OUTPUTS
     }
 
     fn has_body(&self) -> bool {

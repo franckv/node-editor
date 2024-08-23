@@ -1,6 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{fragment::Node, NodeValue, NodeView};
+use crate::node::{fragment::Node, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct FloatNode {
@@ -17,24 +17,20 @@ impl FloatNode {
     }
 }
 
+const INPUTS: [NodeValueType; 0] = [];
+const OUTPUTS: [NodeValueType; 1] = [NodeValueType::F32];
+
 impl NodeView<Node> for FloatNode {
     fn title(&self) -> String {
         "Float".to_string()
     }
 
-    fn inputs(&self) -> usize {
-        0
+    fn inputs(&self) -> &[NodeValueType] {
+        &INPUTS
     }
 
-    fn outputs(&self) -> usize {
-        1
-    }
-
-    fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
-        match other {
-            Node::BinOp(_) => true,
-            _ => false,
-        }
+    fn outputs(&self) -> &[NodeValueType] {
+        &OUTPUTS
     }
 
     fn has_body(&self) -> bool {

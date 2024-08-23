@@ -15,6 +15,8 @@ pub use vec2::Vec2Node;
 
 use crate::node::NodeView;
 
+use super::NodeValueType;
+
 type Node = MathNode;
 
 #[derive(Clone, Debug, serde::Serialize)]
@@ -63,7 +65,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> usize {
+    fn inputs(&self) -> &[NodeValueType] {
         match self {
             Node::Output(value) => value.inputs(),
             Node::Float(value) => value.inputs(),
@@ -73,23 +75,13 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> usize {
+    fn outputs(&self) -> &[NodeValueType] {
         match self {
             Node::Output(value) => value.outputs(),
             Node::Float(value) => value.outputs(),
             Node::Vec2(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),
             Node::Compose(value) => value.outputs(),
-        }
-    }
-
-    fn connect(&self, index: usize, other: &Node, other_index: usize) -> bool {
-        match self {
-            Node::Output(value) => value.connect(index, other, other_index),
-            Node::Float(value) => value.connect(index, other, other_index),
-            Node::Vec2(value) => value.connect(index, other, other_index),
-            Node::BinOp(value) => value.connect(index, other, other_index),
-            Node::Compose(value) => value.connect(index, other, other_index),
         }
     }
 
