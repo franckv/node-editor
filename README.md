@@ -1,1 +1,1 @@
-# node-editor
+Node graph editor experiment

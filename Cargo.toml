@@ -1,0 +1,12 @@
+[package]
+name = "node-editor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.28.1"
+egui = "0.28"
+egui-snarl = "0.4.3"
+gobs = { path = "../gobs-engine/gobs" }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
