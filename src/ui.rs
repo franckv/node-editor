@@ -1,14 +1,22 @@
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
-use crate::{node::Node, view::NodeViewer};
+use crate::{node::NodeView, view::NodeViewer};
 
-#[derive(Default)]
-pub struct NodeUI {
-    snarl: Snarl<Node>,
+pub struct NodeUI<T> {
+    snarl: Snarl<T>,
     style: SnarlStyle,
 }
 
-impl NodeUI {
+impl<T> Default for NodeUI<T> {
+    fn default() -> Self {
+        Self {
+            snarl: Default::default(),
+            style: Default::default(),
+        }
+    }
+}
+
+impl<T: NodeView<T> + Clone> NodeUI<T> {
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
         egui::CentralPanel::default().show(ectx, |ui| {
             self.snarl

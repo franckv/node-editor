@@ -1,6 +1,7 @@
 use egui_snarl::ui::PinInfo;
 
-use super::Node;
+use crate::node::math::MathNode;
+use crate::node::NodeView;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Ops {
@@ -51,10 +52,10 @@ impl BinOpNode {
         1
     }
 
-    pub fn connect(other: &Node) -> bool {
+    pub fn connect(other: &MathNode) -> bool {
         match other {
-            Node::Output(_) => true,
-            Node::BinOp(_) => true,
+            MathNode::Output(_) => true,
+            MathNode::BinOp(_) => true,
             _ => false,
         }
     }
@@ -63,7 +64,7 @@ impl BinOpNode {
         true
     }
 
-    pub fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+    pub fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
         egui::ComboBox::from_label("")
             .selected_text(format!("{:?}", self.op))
             .show_ui(ui, |ui| {
@@ -74,15 +75,20 @@ impl BinOpNode {
             });
     }
 
-    pub fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<Node>) -> PinInfo {
+    pub fn show_input(
+        &mut self,
+        ui: &mut egui::Ui,
+        index: usize,
+        remotes: &Vec<MathNode>,
+    ) -> PinInfo {
         if remotes.len() == 0 {
             ui.label("None");
-            Node::get_pin_float_disconnected()
+            MathNode::get_pin_float_disconnected()
         } else {
             let remote_node = &remotes[0];
             let new_value = match remote_node {
-                Node::Float(value) => value.value(),
-                Node::BinOp(value) => value.value(),
+                MathNode::Float(value) => value.value(),
+                MathNode::BinOp(value) => value.value(),
                 _ => unimplemented!(),
             };
             if index == 0 {
@@ -90,17 +96,17 @@ impl BinOpNode {
             } else {
                 self.b = new_value;
             }
-            ui.label(Node::format_float(new_value));
-            Node::get_pin_float_connected()
+            ui.label(MathNode::format_float(new_value));
+            MathNode::get_pin_float_connected()
         }
     }
 
-    pub fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<Node>) -> PinInfo {
-        ui.label(Node::format_float(self.value()));
+    pub fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+        ui.label(MathNode::format_float(self.value()));
         if remotes.len() > 0 {
-            Node::get_pin_float_connected()
+            MathNode::get_pin_float_connected()
         } else {
-            Node::get_pin_float_disconnected()
+            MathNode::get_pin_float_disconnected()
         }
     }
 }

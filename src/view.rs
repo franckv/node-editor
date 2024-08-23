@@ -1,16 +1,16 @@
 use egui::{Pos2, Ui};
 use egui_snarl::{ui::SnarlViewer, InPin, NodeId, OutPin, Snarl};
 
-use crate::node::{BinOpNode, FloatNode, Node, OutputNode};
+use crate::node::NodeView;
 
 pub struct NodeViewer;
 
-impl SnarlViewer<Node> for NodeViewer {
-    fn title(&mut self, node: &Node) -> String {
+impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
+    fn title(&mut self, node: &T) -> String {
         node.title()
     }
 
-    fn has_body(&mut self, node: &Node) -> bool {
+    fn has_body(&mut self, node: &T) -> bool {
         node.has_body()
     }
 
@@ -21,12 +21,12 @@ impl SnarlViewer<Node> for NodeViewer {
         _outputs: &[OutPin],
         ui: &mut Ui,
         _scale: f32,
-        snarl: &mut Snarl<Node>,
+        snarl: &mut Snarl<T>,
     ) {
         let inputs = inputs
             .iter()
             .flat_map(|pin| pin.remotes.iter().map(|remote| snarl[remote.node].clone()))
-            .collect::<Vec<Node>>();
+            .collect::<Vec<T>>();
 
         let node = &mut snarl[node];
 
@@ -35,7 +35,7 @@ impl SnarlViewer<Node> for NodeViewer {
         }
     }
 
-    fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Node>) {
+    fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<T>) {
         let output = &snarl[from.id.node];
         let input = &snarl[to.id.node];
 
@@ -48,11 +48,11 @@ impl SnarlViewer<Node> for NodeViewer {
         }
     }
 
-    fn outputs(&mut self, node: &Node) -> usize {
+    fn outputs(&mut self, node: &T) -> usize {
         node.outputs()
     }
 
-    fn inputs(&mut self, node: &Node) -> usize {
+    fn inputs(&mut self, node: &T) -> usize {
         node.inputs()
     }
 
@@ -61,13 +61,13 @@ impl SnarlViewer<Node> for NodeViewer {
         pin: &egui_snarl::InPin,
         ui: &mut egui::Ui,
         _scale: f32,
-        snarl: &mut egui_snarl::Snarl<Node>,
+        snarl: &mut egui_snarl::Snarl<T>,
     ) -> egui_snarl::ui::PinInfo {
         let remotes = pin
             .remotes
             .iter()
             .map(|remote| snarl[remote.node].clone())
-            .collect::<Vec<Node>>();
+            .collect::<Vec<T>>();
 
         let node = &mut snarl[pin.id.node];
 
@@ -79,43 +79,34 @@ impl SnarlViewer<Node> for NodeViewer {
         pin: &egui_snarl::OutPin,
         ui: &mut egui::Ui,
         _scale: f32,
-        snarl: &mut egui_snarl::Snarl<Node>,
+        snarl: &mut egui_snarl::Snarl<T>,
     ) -> egui_snarl::ui::PinInfo {
         let remotes = pin
             .remotes
             .iter()
             .map(|remote| snarl[remote.node].clone())
-            .collect::<Vec<Node>>();
+            .collect::<Vec<T>>();
 
         let node = &mut snarl[pin.id.node];
 
         node.show_output(ui, &remotes)
     }
 
-    fn has_graph_menu(&mut self, _pos: Pos2, _snarl: &mut Snarl<Node>) -> bool {
+    fn has_graph_menu(&mut self, _pos: Pos2, _snarl: &mut Snarl<T>) -> bool {
         true
     }
 
-    fn show_graph_menu(&mut self, pos: Pos2, ui: &mut Ui, _scale: f32, snarl: &mut Snarl<Node>) {
+    fn show_graph_menu(&mut self, pos: Pos2, ui: &mut Ui, _scale: f32, snarl: &mut Snarl<T>) {
         ui.label("Add node");
         ui.separator();
-        if ui.button("Float").clicked() {
-            snarl.insert_node(pos, Node::Float(FloatNode::default()));
+        let node = T::show_graph_menu(ui);
+        if let Some(node) = node {
+            snarl.insert_node(pos, node);
             ui.close_menu();
         }
-        if ui.button("Output").clicked() {
-            snarl.insert_node(pos, Node::Output(OutputNode::default()));
-            ui.close_menu();
-        }
-        ui.menu_button("Operations", |ui| {
-            if ui.button("BinOp").clicked() {
-                snarl.insert_node(pos, Node::BinOp(BinOpNode::default()));
-                ui.close_menu();
-            }
-        });
     }
 
-    fn has_node_menu(&mut self, _node: &Node) -> bool {
+    fn has_node_menu(&mut self, _node: &T) -> bool {
         true
     }
 
@@ -126,7 +117,7 @@ impl SnarlViewer<Node> for NodeViewer {
         _outputs: &[OutPin],
         ui: &mut Ui,
         _scale: f32,
-        snarl: &mut Snarl<Node>,
+        snarl: &mut Snarl<T>,
     ) {
         ui.label("Node menu");
         ui.separator();

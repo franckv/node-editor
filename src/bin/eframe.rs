@@ -1,11 +1,11 @@
 use tracing::Level;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter, FmtSubscriber};
 
-use node_editor::ui::NodeUI;
+use node_editor::{node::math::MathNode, ui::NodeUI};
 
 #[derive(Default)]
 struct App {
-    node_ui: NodeUI,
+    node_ui: NodeUI<MathNode>,
 }
 
 impl eframe::App for App {
