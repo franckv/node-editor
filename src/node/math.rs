@@ -13,9 +13,7 @@ pub use float::FloatNode;
 pub use output::OutputNode;
 pub use vec2::Vec2Node;
 
-use crate::node::NodeView;
-
-use super::NodeValueType;
+use crate::node::{NodeValue, NodeValueType, NodeView};
 
 type Node = MathNode;
 
@@ -55,6 +53,26 @@ impl Node {
 }
 
 impl NodeView<Node> for Node {
+    fn out_value(&self, index: usize) -> NodeValue {
+        match self {
+            Node::Output(value) => value.out_value(index),
+            Node::Float(value) => value.out_value(index),
+            Node::Vec2(value) => value.out_value(index),
+            Node::BinOp(value) => value.out_value(index),
+            Node::Compose(value) => value.out_value(index),
+        }
+    }
+
+    fn in_value(&mut self, index: usize, new_value: NodeValue) {
+        match self {
+            Node::Output(value) => value.in_value(index, new_value),
+            Node::Float(value) => value.in_value(index, new_value),
+            Node::Vec2(value) => value.in_value(index, new_value),
+            Node::BinOp(value) => value.in_value(index, new_value),
+            Node::Compose(value) => value.in_value(index, new_value),
+        }
+    }
+
     fn title(&self) -> String {
         match self {
             Node::Output(value) => value.title(),
@@ -65,7 +83,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         match self {
             Node::Output(value) => value.inputs(),
             Node::Float(value) => value.inputs(),
@@ -75,7 +93,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         match self {
             Node::Output(value) => value.outputs(),
             Node::Float(value) => value.outputs(),

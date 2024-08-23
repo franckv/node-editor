@@ -8,7 +8,7 @@ mod float;
 pub use binop::BinOpNode;
 pub use float::FloatNode;
 
-use crate::node::{NodeValueType, NodeView};
+use crate::node::{NodeValue, NodeValueType, NodeView};
 use camera::CameraPositionNode;
 
 type Node = FragmentNode;
@@ -47,6 +47,22 @@ impl Node {
 }
 
 impl NodeView<Node> for Node {
+    fn out_value(&self, index: usize) -> NodeValue {
+        match self {
+            Node::Float(value) => value.out_value(index),
+            Node::BinOp(value) => value.out_value(index),
+            Node::CameraPosition(value) => value.out_value(index),
+        }
+    }
+
+    fn in_value(&mut self, index: usize, new_value: NodeValue) {
+        match self {
+            Node::Float(value) => value.in_value(index, new_value),
+            Node::BinOp(value) => value.in_value(index, new_value),
+            Node::CameraPosition(value) => value.in_value(index, new_value),
+        }
+    }
+
     fn title(&self) -> String {
         match self {
             Node::Float(value) => value.title(),
@@ -55,7 +71,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         match self {
             Node::Float(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
@@ -63,7 +79,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         match self {
             Node::Float(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),

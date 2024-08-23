@@ -8,22 +8,6 @@ pub struct CameraPositionNode {
 }
 
 impl CameraPositionNode {
-    pub fn values(&self) -> NodeValue {
-        NodeValue::Vec3((self.x, self.y, self.z).into())
-    }
-
-    pub fn value(&self, index: usize) -> NodeValue {
-        if index == 0 {
-            NodeValue::F32(self.x)
-        } else if index == 1 {
-            NodeValue::F32(self.y)
-        } else if index == 2 {
-            NodeValue::F32(self.z)
-        } else {
-            NodeValue::Vec3((self.x, self.y, self.z).into())
-        }
-    }
-
     pub fn value_mut(&mut self, index: usize) -> &mut f32 {
         if index == 0 {
             &mut self.x
@@ -37,24 +21,40 @@ impl CameraPositionNode {
     }
 }
 
-const INPUTS: [NodeValueType; 0] = [];
-const OUTPUTS: [NodeValueType; 4] = [
-    NodeValueType::F32,
-    NodeValueType::F32,
-    NodeValueType::F32,
-    NodeValueType::Vec3,
+const INPUTS: [(NodeValueType, &str); 0] = [];
+const OUTPUTS: [(NodeValueType, &str); 4] = [
+    (NodeValueType::F32, "x"),
+    (NodeValueType::F32, "y"),
+    (NodeValueType::F32, "z"),
+    (NodeValueType::Vec3, "xyz"),
 ];
 
 impl NodeView<Node> for CameraPositionNode {
+    fn out_value(&self, index: usize) -> NodeValue {
+        if index == 0 {
+            NodeValue::F32(self.x)
+        } else if index == 1 {
+            NodeValue::F32(self.y)
+        } else if index == 2 {
+            NodeValue::F32(self.z)
+        } else {
+            NodeValue::Vec3((self.x, self.y, self.z).into())
+        }
+    }
+
+    fn in_value(&mut self, _index: usize, _value: NodeValue) {
+        unimplemented!()
+    }
+
     fn title(&self) -> String {
         "CameraPosition".to_string()
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         &OUTPUTS
     }
 
@@ -81,7 +81,7 @@ impl NodeView<Node> for CameraPositionNode {
         index: usize,
         remotes: &Vec<(usize, Node)>,
     ) -> egui_snarl::ui::PinInfo {
-        ui.label(self.values().value_label(index));
+        ui.label(self.outputs()[index].1);
         if index < 3 {
             ui.add(egui::DragValue::new(self.value_mut(index)));
             if remotes.len() > 0 {
@@ -90,7 +90,7 @@ impl NodeView<Node> for CameraPositionNode {
                 Node::get_pin_float_disconnected()
             }
         } else {
-            ui.label(self.values().to_string());
+            ui.label(self.out_value(index).to_string());
 
             if remotes.len() > 0 {
                 Node::get_pin_vec_connected()

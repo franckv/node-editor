@@ -9,7 +9,7 @@ pub struct ComposeNode {
 }
 
 impl ComposeNode {
-    pub fn values(&self) -> NodeValue {
+    fn values(&self) -> NodeValue {
         NodeValue::Vec2((self.x, self.y).into())
     }
 
@@ -30,9 +30,19 @@ impl ComposeNode {
             &mut self.y
         }
     }
+}
 
-    pub fn set_value(&mut self, index: usize, value: NodeValue) {
+const INPUTS: [(NodeValueType, &str); 2] = [(NodeValueType::F32, "x"), (NodeValueType::F32, "y")];
+const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::Vec2, "xy")];
+
+impl NodeView<Node> for ComposeNode {
+    fn out_value(&self, _index: usize) -> NodeValue {
+        NodeValue::Vec2((self.x, self.y).into())
+    }
+
+    fn in_value(&mut self, index: usize, value: NodeValue) {
         match value {
+            NodeValue::None => unimplemented!(),
             NodeValue::F32(value) => {
                 if index == 0 {
                     self.x = value;
@@ -56,21 +66,16 @@ impl ComposeNode {
             }
         }
     }
-}
 
-const INPUTS: [NodeValueType; 2] = [NodeValueType::F32, NodeValueType::F32];
-const OUTPUTS: [NodeValueType; 1] = [NodeValueType::Vec2];
-
-impl NodeView<Node> for ComposeNode {
     fn title(&self) -> String {
         "Compose".to_string()
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         &OUTPUTS
     }
 
@@ -93,13 +98,9 @@ impl NodeView<Node> for ComposeNode {
             Node::get_pin_float_disconnected()
         } else {
             let (r_index, remote_node) = &remotes[0];
-            let new_value = match remote_node {
-                Node::Float(value) => value.value(),
-                Node::BinOp(value) => value.value(),
-                Node::Vec2(value) => value.value(*r_index),
-                _ => unimplemented!(),
-            };
-            self.set_value(index, new_value);
+            let new_value = remote_node.out_value(*r_index);
+
+            self.in_value(index, new_value);
 
             ui.label(new_value.to_string());
             Node::get_pin_float_connected()

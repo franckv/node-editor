@@ -24,8 +24,11 @@ pub struct BinOpNode {
     pub b: f32,
 }
 
-impl BinOpNode {
-    pub fn value(&self) -> NodeValue {
+const INPUTS: [(NodeValueType, &str); 2] = [(NodeValueType::F32, "a"), (NodeValueType::F32, "b")];
+const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::F32, "result")];
+
+impl NodeView<Node> for BinOpNode {
+    fn out_value(&self, _index: usize) -> NodeValue {
         let value = match self.op {
             Ops::Add => self.a + self.b,
             Ops::Sub => self.a - self.b,
@@ -42,8 +45,9 @@ impl BinOpNode {
         NodeValue::F32(value)
     }
 
-    pub fn set_value(&mut self, index: usize, value: NodeValue) {
+    fn in_value(&mut self, index: usize, value: NodeValue) {
         match value {
+            NodeValue::None => unimplemented!(),
             NodeValue::F32(value) => {
                 if index == 0 {
                     self.a = value;
@@ -67,21 +71,16 @@ impl BinOpNode {
             }
         }
     }
-}
 
-const INPUTS: [NodeValueType; 2] = [NodeValueType::F32, NodeValueType::F32];
-const OUTPUTS: [NodeValueType; 1] = [NodeValueType::F32];
-
-impl NodeView<Node> for BinOpNode {
     fn title(&self) -> String {
         "Binary Op".to_string()
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         &OUTPUTS
     }
 
@@ -111,13 +110,9 @@ impl NodeView<Node> for BinOpNode {
             Node::get_pin_float_disconnected()
         } else {
             let (r_index, remote_node) = &remotes[0];
-            let new_value = match remote_node {
-                Node::Float(value) => value.value(),
-                Node::BinOp(value) => value.value(),
-                Node::Vec2(value) => value.value(*r_index),
-                _ => unimplemented!(),
-            };
-            self.set_value(index, new_value);
+            let new_value = remote_node.out_value(*r_index);
+
+            self.in_value(index, new_value);
 
             ui.label(new_value.to_string());
             Node::get_pin_float_connected()
@@ -127,10 +122,10 @@ impl NodeView<Node> for BinOpNode {
     fn show_output(
         &mut self,
         ui: &mut egui::Ui,
-        _index: usize,
+        index: usize,
         remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
-        ui.label(self.value().to_string());
+        ui.label(self.out_value(index).to_string());
         if remotes.len() > 0 {
             Node::get_pin_float_connected()
         } else {

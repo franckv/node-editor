@@ -8,28 +8,32 @@ pub struct FloatNode {
 }
 
 impl FloatNode {
-    pub fn value(&self) -> NodeValue {
-        NodeValue::F32(self.value)
-    }
-
     pub fn value_mut(&mut self) -> &mut f32 {
         &mut self.value
     }
 }
 
-const INPUTS: [NodeValueType; 0] = [];
-const OUTPUTS: [NodeValueType; 1] = [NodeValueType::F32];
+const INPUTS: [(NodeValueType, &str); 0] = [];
+const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::F32, "x")];
 
 impl NodeView<Node> for FloatNode {
+    fn out_value(&self, _index: usize) -> NodeValue {
+        NodeValue::F32(self.value)
+    }
+
+    fn in_value(&mut self, _index: usize, _value: NodeValue) {
+        unimplemented!()
+    }
+
     fn title(&self) -> String {
         "Float".to_string()
     }
 
-    fn inputs(&self) -> &[NodeValueType] {
+    fn inputs(&self) -> &[(NodeValueType, &str)] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[NodeValueType] {
+    fn outputs(&self) -> &[(NodeValueType, &str)] {
         &OUTPUTS
     }
 

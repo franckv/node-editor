@@ -5,9 +5,11 @@ pub mod fragment;
 pub mod math;
 
 pub trait NodeView<T> {
+    fn out_value(&self, index: usize) -> NodeValue;
+    fn in_value(&mut self, index: usize, value: NodeValue);
     fn title(&self) -> String;
-    fn inputs(&self) -> &[NodeValueType];
-    fn outputs(&self) -> &[NodeValueType];
+    fn inputs(&self) -> &[(NodeValueType, &str)];
+    fn outputs(&self) -> &[(NodeValueType, &str)];
     fn has_body(&self) -> bool;
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
     fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<(usize, T)>)
@@ -27,6 +29,7 @@ pub enum NodeValueType {
     Vec2,
     Vec3,
     Any,
+    None,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -34,23 +37,17 @@ pub enum NodeValue {
     F32(f32),
     Vec2(Vec2),
     Vec3(Vec3),
+    None,
 }
 
 impl NodeValue {
-    fn _ty(self) -> NodeValueType {
-        match self {
-            NodeValue::F32(_) => NodeValueType::F32,
-            NodeValue::Vec2(_) => NodeValueType::Vec2,
-            NodeValue::Vec3(_) => NodeValueType::Vec3,
-        }
-    }
-
     fn format_float(value: f32) -> String {
         format!("{}", (value * 100.).round() / 100.)
     }
 
     pub fn to_string(&self) -> String {
         match self {
+            NodeValue::None => "None".to_string(),
             NodeValue::F32(value) => Self::format_float(*value),
             NodeValue::Vec2(value) => {
                 format!(
@@ -66,36 +63,6 @@ impl NodeValue {
                     Self::format_float(value.y),
                     Self::format_float(value.z)
                 )
-            }
-        }
-    }
-
-    pub fn value_label(&self, index: usize) -> String {
-        match self {
-            NodeValue::F32(_) => "x".to_string(),
-            NodeValue::Vec2(_) => {
-                if index == 0 {
-                    "x".to_string()
-                } else if index == 1 {
-                    "y".to_string()
-                } else if index == 2 {
-                    "xy".to_string()
-                } else {
-                    unimplemented!()
-                }
-            }
-            NodeValue::Vec3(_) => {
-                if index == 0 {
-                    "x".to_string()
-                } else if index == 1 {
-                    "y".to_string()
-                } else if index == 2 {
-                    "z".to_string()
-                } else if index == 3 {
-                    "xyz".to_string()
-                } else {
-                    unimplemented!()
-                }
             }
         }
     }
