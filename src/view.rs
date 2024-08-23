@@ -1,7 +1,7 @@
 use egui::{Pos2, Ui};
 use egui_snarl::{ui::SnarlViewer, InPin, NodeId, OutPin, Snarl};
 
-use crate::node::{AddNode, FloatNode, Node, OutputNode, SubNode};
+use crate::node::{BinOpNode, FloatNode, Node, OutputNode};
 
 pub struct NodeViewer;
 
@@ -10,8 +10,32 @@ impl SnarlViewer<Node> for NodeViewer {
         node.title()
     }
 
+    fn has_body(&mut self, node: &Node) -> bool {
+        node.has_body()
+    }
+
+    fn show_body(
+        &mut self,
+        node: NodeId,
+        inputs: &[InPin],
+        _outputs: &[OutPin],
+        ui: &mut Ui,
+        _scale: f32,
+        snarl: &mut Snarl<Node>,
+    ) {
+        let inputs = inputs
+            .iter()
+            .flat_map(|pin| pin.remotes.iter().map(|remote| snarl[remote.node].clone()))
+            .collect::<Vec<Node>>();
+
+        let node = &mut snarl[node];
+
+        if node.has_body() {
+            node.show_body(ui, &inputs);
+        }
+    }
+
     fn connect(&mut self, from: &OutPin, to: &InPin, snarl: &mut Snarl<Node>) {
-        tracing::info!("connect");
         let output = &snarl[from.id.node];
         let input = &snarl[to.id.node];
 
@@ -74,6 +98,7 @@ impl SnarlViewer<Node> for NodeViewer {
 
     fn show_graph_menu(&mut self, pos: Pos2, ui: &mut Ui, _scale: f32, snarl: &mut Snarl<Node>) {
         ui.label("Add node");
+        ui.separator();
         if ui.button("Float").clicked() {
             snarl.insert_node(pos, Node::Float(FloatNode::default()));
             ui.close_menu();
@@ -83,12 +108,8 @@ impl SnarlViewer<Node> for NodeViewer {
             ui.close_menu();
         }
         ui.menu_button("Operations", |ui| {
-            if ui.button("Add").clicked() {
-                snarl.insert_node(pos, Node::OpAdd(AddNode::default()));
-                ui.close_menu();
-            }
-            if ui.button("Sub").clicked() {
-                snarl.insert_node(pos, Node::OpSub(SubNode::default()));
+            if ui.button("BinOp").clicked() {
+                snarl.insert_node(pos, Node::BinOp(BinOpNode::default()));
                 ui.close_menu();
             }
         });
@@ -108,6 +129,7 @@ impl SnarlViewer<Node> for NodeViewer {
         snarl: &mut Snarl<Node>,
     ) {
         ui.label("Node menu");
+        ui.separator();
         if ui.button("Remove").clicked() {
             snarl.remove_node(node);
             ui.close_menu();

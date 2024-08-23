@@ -1,22 +1,19 @@
 use egui::Color32;
 use egui_snarl::ui::PinInfo;
 
+mod binop;
 mod float;
-mod op_add;
-mod op_sub;
 mod output;
 
+pub use binop::BinOpNode;
 pub use float::FloatNode;
-pub use op_add::AddNode;
-pub use op_sub::SubNode;
 pub use output::OutputNode;
 
 #[derive(Clone, Debug)]
 pub enum Node {
     Output(OutputNode),
     Float(FloatNode),
-    OpAdd(AddNode),
-    OpSub(SubNode),
+    BinOp(BinOpNode),
 }
 
 impl Node {
@@ -24,8 +21,7 @@ impl Node {
         match self {
             Node::Output(_) => OutputNode::title(),
             Node::Float(_) => FloatNode::title(),
-            Node::OpAdd(_) => AddNode::title(),
-            Node::OpSub(_) => SubNode::title(),
+            Node::BinOp(_) => BinOpNode::title(),
         }
     }
 
@@ -33,8 +29,7 @@ impl Node {
         match self {
             Node::Output(_) => OutputNode::inputs(),
             Node::Float(_) => FloatNode::inputs(),
-            Node::OpAdd(_) => AddNode::inputs(),
-            Node::OpSub(_) => SubNode::inputs(),
+            Node::BinOp(_) => BinOpNode::inputs(),
         }
     }
 
@@ -42,8 +37,7 @@ impl Node {
         match self {
             Node::Output(_) => OutputNode::outputs(),
             Node::Float(_) => FloatNode::outputs(),
-            Node::OpAdd(_) => AddNode::outputs(),
-            Node::OpSub(_) => SubNode::outputs(),
+            Node::BinOp(_) => BinOpNode::outputs(),
         }
     }
 
@@ -51,8 +45,23 @@ impl Node {
         match self {
             Node::Output(_) => OutputNode::connect(other),
             Node::Float(_) => FloatNode::connect(other),
-            Node::OpAdd(_) => AddNode::connect(other),
-            Node::OpSub(_) => SubNode::connect(other),
+            Node::BinOp(_) => BinOpNode::connect(other),
+        }
+    }
+
+    pub fn has_body(&self) -> bool {
+        match self {
+            Node::Output(_) => OutputNode::has_body(),
+            Node::Float(_) => FloatNode::has_body(),
+            Node::BinOp(_) => BinOpNode::has_body(),
+        }
+    }
+
+    pub fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<Node>) {
+        match self {
+            Node::Output(value) => value.show_body(ui, inputs),
+            Node::Float(value) => value.show_body(ui, inputs),
+            Node::BinOp(value) => value.show_body(ui, inputs),
         }
     }
 
@@ -60,8 +69,7 @@ impl Node {
         match self {
             Node::Output(value) => value.show_input(ui, index, remotes),
             Node::Float(value) => value.show_input(ui, index, remotes),
-            Node::OpAdd(value) => value.show_input(ui, index, remotes),
-            Node::OpSub(value) => value.show_input(ui, index, remotes),
+            Node::BinOp(value) => value.show_input(ui, index, remotes),
         }
     }
 
@@ -69,8 +77,7 @@ impl Node {
         match self {
             Node::Output(value) => value.show_output(ui, remotes),
             Node::Float(value) => value.show_output(ui, remotes),
-            Node::OpAdd(value) => value.show_output(ui, remotes),
-            Node::OpSub(value) => value.show_output(ui, remotes),
+            Node::BinOp(value) => value.show_output(ui, remotes),
         }
     }
 
@@ -80,5 +87,9 @@ impl Node {
 
     pub fn get_pin_float_connected() -> PinInfo {
         PinInfo::circle().with_fill(Color32::GREEN)
+    }
+
+    pub fn format_float(value: f32) -> String {
+        format!("{}", (value * 100.).round() / 100.)
     }
 }

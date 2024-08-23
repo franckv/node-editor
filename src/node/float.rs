@@ -31,10 +31,17 @@ impl FloatNode {
     pub fn connect(other: &Node) -> bool {
         match other {
             Node::Output(_) => true,
-            Node::Float(_) => false,
-            Node::OpAdd(_) => true,
-            Node::OpSub(_) => true,
+            Node::BinOp(_) => true,
+            _ => false,
         }
+    }
+
+    pub fn has_body() -> bool {
+        false
+    }
+
+    pub fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+        unimplemented!();
     }
 
     pub fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<Node>) -> PinInfo {

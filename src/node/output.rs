@@ -22,6 +22,14 @@ impl OutputNode {
         false
     }
 
+    pub fn has_body() -> bool {
+        false
+    }
+
+    pub fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+        unimplemented!();
+    }
+
     pub fn show_input(&mut self, ui: &mut egui::Ui, _index: usize, remotes: &Vec<Node>) -> PinInfo {
         if remotes.len() == 0 {
             ui.label("None");
@@ -29,15 +37,11 @@ impl OutputNode {
         } else {
             match &remotes[0] {
                 Node::Float(value) => {
-                    ui.label(format!("{}", value.value()));
+                    ui.label(Node::format_float(value.value()));
                     Node::get_pin_float_connected()
                 }
-                Node::OpAdd(value) => {
-                    ui.label(format!("{}", value.value()));
-                    Node::get_pin_float_connected()
-                }
-                Node::OpSub(value) => {
-                    ui.label(format!("{}", value.value()));
+                Node::BinOp(value) => {
+                    ui.label(Node::format_float(value.value()));
                     Node::get_pin_float_connected()
                 }
                 _ => unimplemented!(),
