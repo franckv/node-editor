@@ -3,7 +3,7 @@ use egui_snarl::ui::PinInfo;
 use crate::node::math::MathNode;
 use crate::node::NodeView;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub enum Ops {
     Add,
     Sub,
@@ -17,7 +17,7 @@ impl Default for Ops {
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct BinOpNode {
     pub op: Ops,
     pub a: f32,
@@ -77,12 +77,17 @@ impl NodeView<MathNode> for BinOpNode {
             });
     }
 
-    fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_input(
+        &mut self,
+        ui: &mut egui::Ui,
+        index: usize,
+        remotes: &Vec<(usize, MathNode)>,
+    ) -> PinInfo {
         if remotes.len() == 0 {
             ui.label("None");
             MathNode::get_pin_float_disconnected()
         } else {
-            let remote_node = &remotes[0];
+            let (_, remote_node) = &remotes[0];
             let new_value = match remote_node {
                 MathNode::Float(value) => value.value(),
                 MathNode::BinOp(value) => value.value(),
@@ -98,7 +103,12 @@ impl NodeView<MathNode> for BinOpNode {
         }
     }
 
-    fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_output(
+        &mut self,
+        ui: &mut egui::Ui,
+        _index: usize,
+        remotes: &Vec<(usize, MathNode)>,
+    ) -> PinInfo {
         ui.label(MathNode::format_float(self.value()));
         if remotes.len() > 0 {
             MathNode::get_pin_float_connected()

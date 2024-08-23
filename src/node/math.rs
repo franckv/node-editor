@@ -11,7 +11,7 @@ pub use output::OutputNode;
 
 use super::NodeView;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub enum MathNode {
     Output(OutputNode),
     Float(FloatNode),
@@ -77,7 +77,12 @@ impl NodeView<MathNode> for MathNode {
         }
     }
 
-    fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_input(
+        &mut self,
+        ui: &mut egui::Ui,
+        index: usize,
+        remotes: &Vec<(usize, MathNode)>,
+    ) -> PinInfo {
         match self {
             MathNode::Output(value) => value.show_input(ui, index, remotes),
             MathNode::Float(value) => value.show_input(ui, index, remotes),
@@ -85,11 +90,16 @@ impl NodeView<MathNode> for MathNode {
         }
     }
 
-    fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_output(
+        &mut self,
+        ui: &mut egui::Ui,
+        index: usize,
+        remotes: &Vec<(usize, MathNode)>,
+    ) -> PinInfo {
         match self {
-            MathNode::Output(value) => value.show_output(ui, remotes),
-            MathNode::Float(value) => value.show_output(ui, remotes),
-            MathNode::BinOp(value) => value.show_output(ui, remotes),
+            MathNode::Output(value) => value.show_output(ui, index, remotes),
+            MathNode::Float(value) => value.show_output(ui, index, remotes),
+            MathNode::BinOp(value) => value.show_output(ui, index, remotes),
         }
     }
 

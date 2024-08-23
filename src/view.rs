@@ -66,8 +66,8 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let remotes = pin
             .remotes
             .iter()
-            .map(|remote| snarl[remote.node].clone())
-            .collect::<Vec<T>>();
+            .map(|remote| (remote.output, snarl[remote.node].clone()))
+            .collect::<Vec<(usize, T)>>();
 
         let node = &mut snarl[pin.id.node];
 
@@ -84,12 +84,12 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let remotes = pin
             .remotes
             .iter()
-            .map(|remote| snarl[remote.node].clone())
-            .collect::<Vec<T>>();
+            .map(|remote| (remote.input, snarl[remote.node].clone()))
+            .collect::<Vec<(usize, T)>>();
 
         let node = &mut snarl[pin.id.node];
 
-        node.show_output(ui, &remotes)
+        node.show_output(ui, pin.id.output, &remotes)
     }
 
     fn has_graph_menu(&mut self, _pos: Pos2, _snarl: &mut Snarl<T>) -> bool {

@@ -2,7 +2,7 @@ use egui_snarl::ui::PinInfo;
 
 use crate::node::{math::MathNode, NodeView};
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct FloatNode {
     value: f32,
 }
@@ -46,11 +46,16 @@ impl NodeView<MathNode> for FloatNode {
         unimplemented!();
     }
 
-    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<MathNode>) -> PinInfo {
+    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, MathNode)>) -> PinInfo {
         unimplemented!();
     }
 
-    fn show_output(&mut self, ui: &mut egui::Ui, remotes: &Vec<MathNode>) -> PinInfo {
+    fn show_output(
+        &mut self,
+        ui: &mut egui::Ui,
+        _index: usize,
+        remotes: &Vec<(usize, MathNode)>,
+    ) -> PinInfo {
         ui.add(egui::DragValue::new(self.value_mut()));
         if remotes.len() > 0 {
             MathNode::get_pin_float_connected()
