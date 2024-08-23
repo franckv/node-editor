@@ -39,7 +39,7 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let output = &snarl[from.id.node];
         let input = &snarl[to.id.node];
 
-        if output.connect(input) {
+        if output.connect(from.id.output, input, to.id.input) {
             for &remote in &to.remotes {
                 snarl.disconnect(remote, to.id);
             }

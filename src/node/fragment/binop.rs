@@ -1,7 +1,7 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::fragment::FragmentNode;
-use crate::node::NodeView;
+use crate::node::fragment::Node;
+use crate::node::{NodeValue, NodeView};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
 pub enum Ops {
@@ -25,8 +25,8 @@ pub struct BinOpNode {
 }
 
 impl BinOpNode {
-    pub fn value(&self) -> f32 {
-        match self.op {
+    pub fn value(&self) -> NodeValue {
+        let value = match self.op {
             Ops::Add => self.a + self.b,
             Ops::Sub => self.a - self.b,
             Ops::Mul => self.a * self.b,
@@ -37,11 +37,39 @@ impl BinOpNode {
                     self.a / self.b
                 }
             }
+        };
+
+        NodeValue::F32(value)
+    }
+
+    pub fn set_value(&mut self, index: usize, value: NodeValue) {
+        match value {
+            NodeValue::F32(value) => {
+                if index == 0 {
+                    self.a = value;
+                } else {
+                    self.b = value;
+                }
+            }
+            NodeValue::Vec2(value) => {
+                if index == 0 {
+                    self.a = value.x;
+                } else {
+                    self.b = value.y;
+                }
+            }
+            NodeValue::Vec3(value) => {
+                if index == 0 {
+                    self.a = value.x;
+                } else {
+                    self.b = value.y;
+                }
+            }
         }
     }
 }
 
-impl NodeView<FragmentNode> for BinOpNode {
+impl NodeView<Node> for BinOpNode {
     fn title(&self) -> String {
         "Binary Op".to_string()
     }
@@ -54,9 +82,9 @@ impl NodeView<FragmentNode> for BinOpNode {
         1
     }
 
-    fn connect(&self, other: &FragmentNode) -> bool {
+    fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
         match other {
-            FragmentNode::BinOp(_) => true,
+            Node::BinOp(_) => true,
             _ => false,
         }
     }
@@ -65,7 +93,7 @@ impl NodeView<FragmentNode> for BinOpNode {
         true
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<FragmentNode>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<Node>) {
         egui::ComboBox::from_label("")
             .selected_text(format!("{:?}", self.op))
             .show_ui(ui, |ui| {
@@ -80,25 +108,22 @@ impl NodeView<FragmentNode> for BinOpNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, FragmentNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         if remotes.len() == 0 {
             ui.label("None");
-            FragmentNode::get_pin_float_disconnected()
+            Node::get_pin_float_disconnected()
         } else {
             let (r_index, remote_node) = &remotes[0];
             let new_value = match remote_node {
-                FragmentNode::Float(value) => value.value(),
-                FragmentNode::BinOp(value) => value.value(),
-                FragmentNode::CameraPosition(value) => value.value(*r_index),
+                Node::Float(value) => value.value(),
+                Node::BinOp(value) => value.value(),
+                Node::CameraPosition(value) => value.value(*r_index),
             };
-            if index == 0 {
-                self.a = new_value;
-            } else {
-                self.b = new_value;
-            }
-            ui.label(FragmentNode::format_float(new_value));
-            FragmentNode::get_pin_float_connected()
+            self.set_value(index, new_value);
+
+            ui.label(new_value.to_string());
+            Node::get_pin_float_connected()
         }
     }
 
@@ -106,17 +131,17 @@ impl NodeView<FragmentNode> for BinOpNode {
         &mut self,
         ui: &mut egui::Ui,
         _index: usize,
-        remotes: &Vec<(usize, FragmentNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
-        ui.label(FragmentNode::format_float(self.value()));
+        ui.label(self.value().to_string());
         if remotes.len() > 0 {
-            FragmentNode::get_pin_float_connected()
+            Node::get_pin_float_connected()
         } else {
-            FragmentNode::get_pin_float_disconnected()
+            Node::get_pin_float_disconnected()
         }
     }
 
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<FragmentNode> {
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<Node> {
         unimplemented!();
     }
 }

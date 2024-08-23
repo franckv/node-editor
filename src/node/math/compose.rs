@@ -1,77 +1,66 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::math::Node;
-use crate::node::{NodeValue, NodeView};
-
-#[derive(Clone, Debug, PartialEq, serde::Serialize)]
-pub enum Ops {
-    Add,
-    Sub,
-    Mul,
-    Div,
-}
-
-impl Default for Ops {
-    fn default() -> Self {
-        Ops::Add
-    }
-}
+use crate::node::{math::Node, NodeValue, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
-pub struct BinOpNode {
-    pub op: Ops,
-    pub a: f32,
-    pub b: f32,
+pub struct ComposeNode {
+    x: f32,
+    y: f32,
 }
 
-impl BinOpNode {
-    pub fn value(&self) -> NodeValue {
-        let value = match self.op {
-            Ops::Add => self.a + self.b,
-            Ops::Sub => self.a - self.b,
-            Ops::Mul => self.a * self.b,
-            Ops::Div => {
-                if self.b == 0. {
-                    0.
-                } else {
-                    self.a / self.b
-                }
-            }
-        };
+impl ComposeNode {
+    pub fn values(&self) -> NodeValue {
+        NodeValue::Vec2((self.x, self.y).into())
+    }
 
-        NodeValue::F32(value)
+    pub fn value(&self, index: usize) -> NodeValue {
+        if index == 0 {
+            NodeValue::F32(self.x)
+        } else if index == 1 {
+            NodeValue::F32(self.y)
+        } else {
+            NodeValue::Vec2((self.x, self.y).into())
+        }
+    }
+
+    pub fn value_mut(&mut self, index: usize) -> &mut f32 {
+        if index == 0 {
+            &mut self.x
+        } else {
+            &mut self.y
+        }
     }
 
     pub fn set_value(&mut self, index: usize, value: NodeValue) {
         match value {
             NodeValue::F32(value) => {
                 if index == 0 {
-                    self.a = value;
+                    self.x = value;
                 } else {
-                    self.b = value;
+                    self.y = value;
                 }
             }
             NodeValue::Vec2(value) => {
                 if index == 0 {
-                    self.a = value.x;
+                    self.x = value.x;
                 } else {
-                    self.b = value.y;
+                    self.y = value.y;
                 }
             }
             NodeValue::Vec3(value) => {
                 if index == 0 {
-                    self.a = value.x;
+                    self.x = value.x;
                 } else {
-                    self.b = value.y;
+                    self.y = value.y;
                 }
             }
         }
     }
 }
 
-impl NodeView<Node> for BinOpNode {
+impl NodeView<Node> for ComposeNode {
     fn title(&self) -> String {
-        "Binary Op".to_string()
+        "Compose".to_string()
     }
 
     fn inputs(&self) -> usize {
@@ -85,25 +74,16 @@ impl NodeView<Node> for BinOpNode {
     fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
         match other {
             Node::Output(_) => true,
-            Node::BinOp(_) => true,
-            Node::Compose(_) => true,
             _ => false,
         }
     }
 
     fn has_body(&self) -> bool {
-        true
+        false
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<Node>) {
-        egui::ComboBox::from_label("")
-            .selected_text(format!("{:?}", self.op))
-            .show_ui(ui, |ui| {
-                ui.selectable_value(&mut self.op, Ops::Add, "Add");
-                ui.selectable_value(&mut self.op, Ops::Sub, "Sub");
-                ui.selectable_value(&mut self.op, Ops::Mul, "Mul");
-                ui.selectable_value(&mut self.op, Ops::Div, "Div");
-            });
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+        unimplemented!();
     }
 
     fn show_input(
@@ -133,14 +113,15 @@ impl NodeView<Node> for BinOpNode {
     fn show_output(
         &mut self,
         ui: &mut egui::Ui,
-        _index: usize,
+        _: usize,
         remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
-        ui.label(self.value().to_string());
+        ui.label(self.values().to_string());
+
         if remotes.len() > 0 {
-            Node::get_pin_float_connected()
+            Node::get_pin_vec_connected()
         } else {
-            Node::get_pin_float_disconnected()
+            Node::get_pin_vec_disconnected()
         }
     }
 

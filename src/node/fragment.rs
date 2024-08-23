@@ -1,4 +1,3 @@
-use camera::CameraPositionNode;
 use egui::Color32;
 use egui_snarl::ui::PinInfo;
 
@@ -9,7 +8,10 @@ mod float;
 pub use binop::BinOpNode;
 pub use float::FloatNode;
 
-use super::NodeView;
+use crate::node::NodeView;
+use camera::CameraPositionNode;
+
+type Node = FragmentNode;
 
 #[derive(Clone, Debug, serde::Serialize)]
 pub enum FragmentNode {
@@ -18,7 +20,7 @@ pub enum FragmentNode {
     CameraPosition(CameraPositionNode),
 }
 
-impl FragmentNode {
+impl Node {
     fn get_pin_float_disconnected() -> PinInfo {
         PinInfo::circle().with_fill(Color32::RED)
     }
@@ -26,54 +28,70 @@ impl FragmentNode {
     fn get_pin_float_connected() -> PinInfo {
         PinInfo::circle().with_fill(Color32::GREEN)
     }
+
+    fn get_pin_vec_disconnected() -> PinInfo {
+        PinInfo::triangle().with_fill(Color32::RED)
+    }
+
+    fn get_pin_vec_connected() -> PinInfo {
+        PinInfo::triangle().with_fill(Color32::GREEN)
+    }
+
+    fn _get_pin_any_disconnected() -> PinInfo {
+        PinInfo::star().with_fill(Color32::RED)
+    }
+
+    fn _get_pin_any_connected() -> PinInfo {
+        PinInfo::star().with_fill(Color32::GREEN)
+    }
 }
 
-impl NodeView<FragmentNode> for FragmentNode {
+impl NodeView<Node> for Node {
     fn title(&self) -> String {
         match self {
-            FragmentNode::Float(value) => value.title(),
-            FragmentNode::BinOp(value) => value.title(),
-            FragmentNode::CameraPosition(value) => value.title(),
+            Node::Float(value) => value.title(),
+            Node::BinOp(value) => value.title(),
+            Node::CameraPosition(value) => value.title(),
         }
     }
 
     fn inputs(&self) -> usize {
         match self {
-            FragmentNode::Float(value) => value.inputs(),
-            FragmentNode::BinOp(value) => value.inputs(),
-            FragmentNode::CameraPosition(value) => value.inputs(),
+            Node::Float(value) => value.inputs(),
+            Node::BinOp(value) => value.inputs(),
+            Node::CameraPosition(value) => value.inputs(),
         }
     }
 
     fn outputs(&self) -> usize {
         match self {
-            FragmentNode::Float(value) => value.outputs(),
-            FragmentNode::BinOp(value) => value.outputs(),
-            FragmentNode::CameraPosition(value) => value.outputs(),
+            Node::Float(value) => value.outputs(),
+            Node::BinOp(value) => value.outputs(),
+            Node::CameraPosition(value) => value.outputs(),
         }
     }
 
-    fn connect(&self, other: &FragmentNode) -> bool {
+    fn connect(&self, index: usize, other: &Node, other_index: usize) -> bool {
         match self {
-            FragmentNode::Float(value) => value.connect(other),
-            FragmentNode::BinOp(value) => value.connect(other),
-            FragmentNode::CameraPosition(value) => value.connect(other),
+            Node::Float(value) => value.connect(index, other, other_index),
+            Node::BinOp(value) => value.connect(index, other, other_index),
+            Node::CameraPosition(value) => value.connect(index, other, other_index),
         }
     }
 
     fn has_body(&self) -> bool {
         match self {
-            FragmentNode::Float(value) => value.has_body(),
-            FragmentNode::BinOp(value) => value.has_body(),
-            FragmentNode::CameraPosition(value) => value.has_body(),
+            Node::Float(value) => value.has_body(),
+            Node::BinOp(value) => value.has_body(),
+            Node::CameraPosition(value) => value.has_body(),
         }
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<FragmentNode>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<Node>) {
         match self {
-            FragmentNode::Float(value) => value.show_body(ui, inputs),
-            FragmentNode::BinOp(value) => value.show_body(ui, inputs),
-            FragmentNode::CameraPosition(value) => value.show_body(ui, inputs),
+            Node::Float(value) => value.show_body(ui, inputs),
+            Node::BinOp(value) => value.show_body(ui, inputs),
+            Node::CameraPosition(value) => value.show_body(ui, inputs),
         }
     }
 
@@ -81,12 +99,12 @@ impl NodeView<FragmentNode> for FragmentNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, FragmentNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         match self {
-            FragmentNode::Float(value) => value.show_input(ui, index, remotes),
-            FragmentNode::BinOp(value) => value.show_input(ui, index, remotes),
-            FragmentNode::CameraPosition(value) => value.show_input(ui, index, remotes),
+            Node::Float(value) => value.show_input(ui, index, remotes),
+            Node::BinOp(value) => value.show_input(ui, index, remotes),
+            Node::CameraPosition(value) => value.show_input(ui, index, remotes),
         }
     }
 
@@ -94,28 +112,28 @@ impl NodeView<FragmentNode> for FragmentNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, FragmentNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         match self {
-            FragmentNode::Float(value) => value.show_output(ui, index, remotes),
-            FragmentNode::BinOp(value) => value.show_output(ui, index, remotes),
-            FragmentNode::CameraPosition(value) => value.show_output(ui, index, remotes),
+            Node::Float(value) => value.show_output(ui, index, remotes),
+            Node::BinOp(value) => value.show_output(ui, index, remotes),
+            Node::CameraPosition(value) => value.show_output(ui, index, remotes),
         }
     }
 
-    fn show_graph_menu(ui: &mut egui::Ui) -> Option<FragmentNode> {
+    fn show_graph_menu(ui: &mut egui::Ui) -> Option<Node> {
         let mut result = None;
         if ui.button("Float").clicked() {
-            result = Some(FragmentNode::Float(FloatNode::default()));
+            result = Some(Node::Float(FloatNode::default()));
         }
         ui.menu_button("Inputs", |ui| {
             if ui.button("CameraPos").clicked() {
-                result = Some(FragmentNode::CameraPosition(CameraPositionNode::default()));
+                result = Some(Node::CameraPosition(CameraPositionNode::default()));
             }
         });
         ui.menu_button("Operations", |ui| {
             if ui.button("BinOp").clicked() {
-                result = Some(FragmentNode::BinOp(BinOpNode::default()));
+                result = Some(Node::BinOp(BinOpNode::default()));
             }
         });
 
@@ -123,7 +141,7 @@ impl NodeView<FragmentNode> for FragmentNode {
     }
 }
 
-impl FragmentNode {
+impl Node {
     pub fn format_float(value: f32) -> String {
         format!("{}", (value * 100.).round() / 100.)
     }

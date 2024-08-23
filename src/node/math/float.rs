@@ -1,6 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{math::MathNode, NodeView};
+use crate::node::{math::Node, NodeValue, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
 pub struct FloatNode {
@@ -8,8 +8,8 @@ pub struct FloatNode {
 }
 
 impl FloatNode {
-    pub fn value(&self) -> f32 {
-        self.value
+    pub fn value(&self) -> NodeValue {
+        NodeValue::F32(self.value)
     }
 
     pub fn value_mut(&mut self) -> &mut f32 {
@@ -17,7 +17,7 @@ impl FloatNode {
     }
 }
 
-impl NodeView<MathNode> for FloatNode {
+impl NodeView<Node> for FloatNode {
     fn title(&self) -> String {
         "Float".to_string()
     }
@@ -30,10 +30,11 @@ impl NodeView<MathNode> for FloatNode {
         1
     }
 
-    fn connect(&self, other: &MathNode) -> bool {
+    fn connect(&self, _: usize, other: &Node, _: usize) -> bool {
         match other {
-            MathNode::Output(_) => true,
-            MathNode::BinOp(_) => true,
+            Node::Output(_) => true,
+            Node::BinOp(_) => true,
+            Node::Compose(_) => true,
             _ => false,
         }
     }
@@ -42,11 +43,11 @@ impl NodeView<MathNode> for FloatNode {
         false
     }
 
-    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<MathNode>) {
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<Node>) {
         unimplemented!();
     }
 
-    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, MathNode)>) -> PinInfo {
+    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, Node)>) -> PinInfo {
         unimplemented!();
     }
 
@@ -54,17 +55,17 @@ impl NodeView<MathNode> for FloatNode {
         &mut self,
         ui: &mut egui::Ui,
         _index: usize,
-        remotes: &Vec<(usize, MathNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         ui.add(egui::DragValue::new(self.value_mut()));
         if remotes.len() > 0 {
-            MathNode::get_pin_float_connected()
+            Node::get_pin_float_connected()
         } else {
-            MathNode::get_pin_float_disconnected()
+            Node::get_pin_float_disconnected()
         }
     }
 
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<MathNode> {
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<Node> {
         unimplemented!();
     }
 }

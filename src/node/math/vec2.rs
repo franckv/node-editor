@@ -1,15 +1,16 @@
-use crate::node::{fragment::Node, NodeValue, NodeView};
+use egui_snarl::ui::PinInfo;
+
+use crate::node::{math::Node, NodeValue, NodeView};
 
 #[derive(Clone, Default, Debug, serde::Serialize)]
-pub struct CameraPositionNode {
+pub struct Vec2Node {
     x: f32,
     y: f32,
-    z: f32,
 }
 
-impl CameraPositionNode {
+impl Vec2Node {
     pub fn values(&self) -> NodeValue {
-        NodeValue::Vec3((self.x, self.y, self.z).into())
+        NodeValue::Vec2((self.x, self.y).into())
     }
 
     pub fn value(&self, index: usize) -> NodeValue {
@@ -17,29 +18,23 @@ impl CameraPositionNode {
             NodeValue::F32(self.x)
         } else if index == 1 {
             NodeValue::F32(self.y)
-        } else if index == 2 {
-            NodeValue::F32(self.z)
         } else {
-            NodeValue::Vec3((self.x, self.y, self.z).into())
+            NodeValue::Vec2((self.x, self.y).into())
         }
     }
 
     pub fn value_mut(&mut self, index: usize) -> &mut f32 {
         if index == 0 {
             &mut self.x
-        } else if index == 1 {
-            &mut self.y
-        } else if index == 2 {
-            &mut self.z
         } else {
-            unimplemented!()
+            &mut self.y
         }
     }
 }
 
-impl NodeView<Node> for CameraPositionNode {
+impl NodeView<Node> for Vec2Node {
     fn title(&self) -> String {
-        "CameraPosition".to_string()
+        "Vec2".to_string()
     }
 
     fn inputs(&self) -> usize {
@@ -47,12 +42,14 @@ impl NodeView<Node> for CameraPositionNode {
     }
 
     fn outputs(&self) -> usize {
-        4
+        3
     }
 
     fn connect(&self, index: usize, other: &Node, _: usize) -> bool {
         match other {
-            Node::BinOp(_) => index < 3,
+            Node::Output(_) => true,
+            Node::BinOp(_) => index < 2,
+            Node::Compose(_) => index < 2,
             _ => false,
         }
     }
@@ -61,16 +58,11 @@ impl NodeView<Node> for CameraPositionNode {
         false
     }
 
-    fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<Node>) {
-        todo!()
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+        unimplemented!();
     }
 
-    fn show_input(
-        &mut self,
-        _: &mut egui::Ui,
-        _: usize,
-        _: &Vec<(usize, Node)>,
-    ) -> egui_snarl::ui::PinInfo {
+    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, Node)>) -> PinInfo {
         unimplemented!();
     }
 
@@ -79,10 +71,11 @@ impl NodeView<Node> for CameraPositionNode {
         ui: &mut egui::Ui,
         index: usize,
         remotes: &Vec<(usize, Node)>,
-    ) -> egui_snarl::ui::PinInfo {
+    ) -> PinInfo {
         ui.label(self.values().value_label(index));
-        if index < 3 {
+        if index < 2 {
             ui.add(egui::DragValue::new(self.value_mut(index)));
+
             if remotes.len() > 0 {
                 Node::get_pin_float_connected()
             } else {
@@ -100,6 +93,6 @@ impl NodeView<Node> for CameraPositionNode {
     }
 
     fn show_graph_menu(_: &mut egui::Ui) -> Option<Node> {
-        unimplemented!()
+        unimplemented!();
     }
 }

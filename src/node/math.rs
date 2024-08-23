@@ -2,23 +2,31 @@ use egui::Color32;
 use egui_snarl::ui::PinInfo;
 
 mod binop;
+mod compose;
 mod float;
 mod output;
+mod vec2;
 
 pub use binop::BinOpNode;
+pub use compose::ComposeNode;
 pub use float::FloatNode;
 pub use output::OutputNode;
+pub use vec2::Vec2Node;
 
-use super::NodeView;
+use crate::node::NodeView;
+
+type Node = MathNode;
 
 #[derive(Clone, Debug, serde::Serialize)]
 pub enum MathNode {
     Output(OutputNode),
     Float(FloatNode),
+    Vec2(Vec2Node),
     BinOp(BinOpNode),
+    Compose(ComposeNode),
 }
 
-impl MathNode {
+impl Node {
     fn get_pin_float_disconnected() -> PinInfo {
         PinInfo::circle().with_fill(Color32::RED)
     }
@@ -26,54 +34,82 @@ impl MathNode {
     fn get_pin_float_connected() -> PinInfo {
         PinInfo::circle().with_fill(Color32::GREEN)
     }
+
+    fn get_pin_vec_disconnected() -> PinInfo {
+        PinInfo::triangle().with_fill(Color32::RED)
+    }
+
+    fn get_pin_vec_connected() -> PinInfo {
+        PinInfo::triangle().with_fill(Color32::GREEN)
+    }
+
+    fn get_pin_any_disconnected() -> PinInfo {
+        PinInfo::star().with_fill(Color32::RED)
+    }
+
+    fn get_pin_any_connected() -> PinInfo {
+        PinInfo::star().with_fill(Color32::GREEN)
+    }
 }
 
-impl NodeView<MathNode> for MathNode {
+impl NodeView<Node> for Node {
     fn title(&self) -> String {
         match self {
-            MathNode::Output(value) => value.title(),
-            MathNode::Float(value) => value.title(),
-            MathNode::BinOp(value) => value.title(),
+            Node::Output(value) => value.title(),
+            Node::Float(value) => value.title(),
+            Node::Vec2(value) => value.title(),
+            Node::BinOp(value) => value.title(),
+            Node::Compose(value) => value.title(),
         }
     }
 
     fn inputs(&self) -> usize {
         match self {
-            MathNode::Output(value) => value.inputs(),
-            MathNode::Float(value) => value.inputs(),
-            MathNode::BinOp(value) => value.inputs(),
+            Node::Output(value) => value.inputs(),
+            Node::Float(value) => value.inputs(),
+            Node::Vec2(value) => value.inputs(),
+            Node::BinOp(value) => value.inputs(),
+            Node::Compose(value) => value.inputs(),
         }
     }
 
     fn outputs(&self) -> usize {
         match self {
-            MathNode::Output(value) => value.outputs(),
-            MathNode::Float(value) => value.outputs(),
-            MathNode::BinOp(value) => value.outputs(),
+            Node::Output(value) => value.outputs(),
+            Node::Float(value) => value.outputs(),
+            Node::Vec2(value) => value.outputs(),
+            Node::BinOp(value) => value.outputs(),
+            Node::Compose(value) => value.outputs(),
         }
     }
 
-    fn connect(&self, other: &MathNode) -> bool {
+    fn connect(&self, index: usize, other: &Node, other_index: usize) -> bool {
         match self {
-            MathNode::Output(value) => value.connect(other),
-            MathNode::Float(value) => value.connect(other),
-            MathNode::BinOp(value) => value.connect(other),
+            Node::Output(value) => value.connect(index, other, other_index),
+            Node::Float(value) => value.connect(index, other, other_index),
+            Node::Vec2(value) => value.connect(index, other, other_index),
+            Node::BinOp(value) => value.connect(index, other, other_index),
+            Node::Compose(value) => value.connect(index, other, other_index),
         }
     }
 
     fn has_body(&self) -> bool {
         match self {
-            MathNode::Output(value) => value.has_body(),
-            MathNode::Float(value) => value.has_body(),
-            MathNode::BinOp(value) => value.has_body(),
+            Node::Output(value) => value.has_body(),
+            Node::Float(value) => value.has_body(),
+            Node::Vec2(value) => value.has_body(),
+            Node::BinOp(value) => value.has_body(),
+            Node::Compose(value) => value.has_body(),
         }
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<MathNode>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<Node>) {
         match self {
-            MathNode::Output(value) => value.show_body(ui, inputs),
-            MathNode::Float(value) => value.show_body(ui, inputs),
-            MathNode::BinOp(value) => value.show_body(ui, inputs),
+            Node::Output(value) => value.show_body(ui, inputs),
+            Node::Float(value) => value.show_body(ui, inputs),
+            Node::Vec2(value) => value.show_body(ui, inputs),
+            Node::BinOp(value) => value.show_body(ui, inputs),
+            Node::Compose(value) => value.show_body(ui, inputs),
         }
     }
 
@@ -81,12 +117,14 @@ impl NodeView<MathNode> for MathNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, MathNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         match self {
-            MathNode::Output(value) => value.show_input(ui, index, remotes),
-            MathNode::Float(value) => value.show_input(ui, index, remotes),
-            MathNode::BinOp(value) => value.show_input(ui, index, remotes),
+            Node::Output(value) => value.show_input(ui, index, remotes),
+            Node::Float(value) => value.show_input(ui, index, remotes),
+            Node::Vec2(value) => value.show_input(ui, index, remotes),
+            Node::BinOp(value) => value.show_input(ui, index, remotes),
+            Node::Compose(value) => value.show_input(ui, index, remotes),
         }
     }
 
@@ -94,35 +132,39 @@ impl NodeView<MathNode> for MathNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, MathNode)>,
+        remotes: &Vec<(usize, Node)>,
     ) -> PinInfo {
         match self {
-            MathNode::Output(value) => value.show_output(ui, index, remotes),
-            MathNode::Float(value) => value.show_output(ui, index, remotes),
-            MathNode::BinOp(value) => value.show_output(ui, index, remotes),
+            Node::Output(value) => value.show_output(ui, index, remotes),
+            Node::Float(value) => value.show_output(ui, index, remotes),
+            Node::Vec2(value) => value.show_output(ui, index, remotes),
+            Node::BinOp(value) => value.show_output(ui, index, remotes),
+            Node::Compose(value) => value.show_output(ui, index, remotes),
         }
     }
 
-    fn show_graph_menu(ui: &mut egui::Ui) -> Option<MathNode> {
+    fn show_graph_menu(ui: &mut egui::Ui) -> Option<Node> {
         let mut result = None;
-        if ui.button("Float").clicked() {
-            result = Some(MathNode::Float(FloatNode::default()));
-        }
+        ui.menu_button("Constants", |ui| {
+            if ui.button("Float").clicked() {
+                result = Some(Node::Float(FloatNode::default()));
+            }
+            if ui.button("Vec2").clicked() {
+                result = Some(Node::Vec2(Vec2Node::default()));
+            }
+        });
         if ui.button("Output").clicked() {
-            result = Some(MathNode::Output(OutputNode::default()));
+            result = Some(Node::Output(OutputNode::default()));
         }
         ui.menu_button("Operations", |ui| {
             if ui.button("BinOp").clicked() {
-                result = Some(MathNode::BinOp(BinOpNode::default()));
+                result = Some(Node::BinOp(BinOpNode::default()));
+            }
+            if ui.button("Compose").clicked() {
+                result = Some(Node::Compose(ComposeNode::default()));
             }
         });
 
         result
-    }
-}
-
-impl MathNode {
-    pub fn format_float(value: f32) -> String {
-        format!("{}", (value * 100.).round() / 100.)
     }
 }
