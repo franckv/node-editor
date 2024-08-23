@@ -1,5 +1,6 @@
 use egui_snarl::ui::PinInfo;
 
+pub mod fragment;
 pub mod math;
 
 pub trait NodeView<T> {
