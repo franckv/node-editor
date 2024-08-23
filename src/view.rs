@@ -1,7 +1,7 @@
 use egui::{Pos2, Ui};
 use egui_snarl::{ui::SnarlViewer, InPin, NodeId, OutPin, Snarl};
 
-use crate::node::{AddNode, FloatNode, Node, OutputNode};
+use crate::node::{AddNode, FloatNode, Node, OutputNode, SubNode};
 
 pub struct NodeViewer;
 
@@ -85,6 +85,10 @@ impl SnarlViewer<Node> for NodeViewer {
         ui.menu_button("Operations", |ui| {
             if ui.button("Add").clicked() {
                 snarl.insert_node(pos, Node::OpAdd(AddNode::default()));
+                ui.close_menu();
+            }
+            if ui.button("Sub").clicked() {
+                snarl.insert_node(pos, Node::OpSub(SubNode::default()));
                 ui.close_menu();
             }
         });

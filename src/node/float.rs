@@ -33,6 +33,7 @@ impl FloatNode {
             Node::Output(_) => true,
             Node::Float(_) => false,
             Node::OpAdd(_) => true,
+            Node::OpSub(_) => true,
         }
     }
 

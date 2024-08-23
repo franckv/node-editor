@@ -36,6 +36,10 @@ impl OutputNode {
                     ui.label(format!("{}", value.value()));
                     Node::get_pin_float_connected()
                 }
+                Node::OpSub(value) => {
+                    ui.label(format!("{}", value.value()));
+                    Node::get_pin_float_connected()
+                }
                 _ => unimplemented!(),
             }
         }

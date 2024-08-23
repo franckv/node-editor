@@ -3,18 +3,18 @@ use egui_snarl::ui::PinInfo;
 use super::Node;
 
 #[derive(Clone, Default, Debug)]
-pub struct AddNode {
+pub struct SubNode {
     pub a: f32,
     pub b: f32,
 }
 
-impl AddNode {
+impl SubNode {
     pub fn value(&self) -> f32 {
-        self.a + self.b
+        self.a - self.b
     }
 
     pub fn title() -> String {
-        "Add".to_string()
+        "Sub".to_string()
     }
 
     pub fn inputs() -> usize {
