@@ -6,7 +6,7 @@ use crate::node::{NodeValue, NodeValueType, NodeView};
 
 type Node = FragmentNode;
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub enum FragmentNode {
     Float(FloatNode<Self>),
     BinOp(BinOpNode<Self>),

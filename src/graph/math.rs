@@ -6,7 +6,7 @@ use crate::node::{NodeValue, NodeValueType, NodeView};
 
 type Node = MathNode;
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub enum MathNode {
     Output(OutputNode<Self>),
     Float(FloatNode<Self>),

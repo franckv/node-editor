@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct CameraPositionNode<T> {
     x: f32,
     y: f32,

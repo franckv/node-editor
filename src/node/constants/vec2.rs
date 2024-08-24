@@ -4,7 +4,7 @@ use egui_snarl::ui::PinInfo;
 
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Vec2Node<T> {
     x: f32,
     y: f32,

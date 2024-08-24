@@ -4,7 +4,7 @@ use egui_snarl::ui::PinInfo;
 
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
-#[derive(Clone, Debug, PartialEq, serde::Serialize)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Ops {
     Add,
     Sub,
@@ -18,7 +18,7 @@ impl Default for Ops {
     }
 }
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct BinOpNode<T> {
     pub op: Ops,
     pub a: f32,
