@@ -1,6 +1,7 @@
+use std::marker::PhantomData;
+
 use egui_snarl::ui::PinInfo;
 
-use crate::node::math::Node;
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize)]
@@ -17,17 +18,29 @@ impl Default for Ops {
     }
 }
 
-#[derive(Clone, Default, Debug, serde::Serialize)]
-pub struct BinOpNode {
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct BinOpNode<T> {
     pub op: Ops,
     pub a: f32,
     pub b: f32,
+    node_type: PhantomData<T>,
+}
+
+impl<T> Default for BinOpNode<T> {
+    fn default() -> Self {
+        Self {
+            op: Default::default(),
+            a: Default::default(),
+            b: Default::default(),
+            node_type: Default::default(),
+        }
+    }
 }
 
 const INPUTS: [(NodeValueType, &str); 2] = [(NodeValueType::F32, "a"), (NodeValueType::F32, "b")];
 const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::F32, "result")];
 
-impl NodeView<Node> for BinOpNode {
+impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
         let value = match self.op {
             Ops::Add => self.a + self.b,
@@ -88,7 +101,7 @@ impl NodeView<Node> for BinOpNode {
         true
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<Node>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<T>) {
         egui::ComboBox::from_label("")
             .selected_text(format!("{:?}", self.op))
             .show_ui(ui, |ui| {
@@ -103,11 +116,13 @@ impl NodeView<Node> for BinOpNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, Node)>,
+        remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
+        let (ty, label) = self.inputs()[index];
+        ui.label(label);
         if remotes.len() == 0 {
             ui.label("None");
-            Node::get_pin_float_disconnected()
+            T::get_node_pin(ty, false)
         } else {
             let (r_index, remote_node) = &remotes[0];
             let new_value = remote_node.out_value(*r_index);
@@ -115,7 +130,7 @@ impl NodeView<Node> for BinOpNode {
             self.in_value(index, new_value);
 
             ui.label(new_value.to_string());
-            Node::get_pin_float_connected()
+            T::get_node_pin(ty, true)
         }
     }
 
@@ -123,17 +138,23 @@ impl NodeView<Node> for BinOpNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, Node)>,
+        remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
+        let (ty, label) = self.outputs()[index];
+        ui.label(label);
         ui.label(self.out_value(index).to_string());
         if remotes.len() > 0 {
-            Node::get_pin_float_connected()
+            T::get_node_pin(ty, true)
         } else {
-            Node::get_pin_float_disconnected()
+            T::get_node_pin(ty, false)
         }
     }
 
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<Node> {
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
+    }
+
+    fn get_node_pin(_ty: NodeValueType, _connected: bool) -> PinInfo {
+        unimplemented!()
     }
 }

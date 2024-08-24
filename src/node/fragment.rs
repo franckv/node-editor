@@ -15,35 +15,9 @@ type Node = FragmentNode;
 
 #[derive(Clone, Debug, serde::Serialize)]
 pub enum FragmentNode {
-    Float(FloatNode),
-    BinOp(BinOpNode),
-    CameraPosition(CameraPositionNode),
-}
-
-impl Node {
-    fn get_pin_float_disconnected() -> PinInfo {
-        PinInfo::circle().with_fill(Color32::RED)
-    }
-
-    fn get_pin_float_connected() -> PinInfo {
-        PinInfo::circle().with_fill(Color32::GREEN)
-    }
-
-    fn get_pin_vec_disconnected() -> PinInfo {
-        PinInfo::triangle().with_fill(Color32::RED)
-    }
-
-    fn get_pin_vec_connected() -> PinInfo {
-        PinInfo::triangle().with_fill(Color32::GREEN)
-    }
-
-    fn _get_pin_any_disconnected() -> PinInfo {
-        PinInfo::star().with_fill(Color32::RED)
-    }
-
-    fn _get_pin_any_connected() -> PinInfo {
-        PinInfo::star().with_fill(Color32::GREEN)
-    }
+    Float(FloatNode<Self>),
+    BinOp(BinOpNode<Self>),
+    CameraPosition(CameraPositionNode<Self>),
 }
 
 impl NodeView<Node> for Node {
@@ -146,6 +120,22 @@ impl NodeView<Node> for Node {
         });
 
         result
+    }
+
+    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo {
+        let color = if connected {
+            Color32::GREEN
+        } else {
+            Color32::RED
+        };
+
+        match ty {
+            NodeValueType::F32 => PinInfo::circle().with_fill(color),
+            NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Any => PinInfo::star().with_fill(color),
+            NodeValueType::None => unimplemented!(),
+        }
     }
 }
 

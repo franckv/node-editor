@@ -1,13 +1,27 @@
-use crate::node::{fragment::Node, NodeValue, NodeValueType, NodeView};
+use std::marker::PhantomData;
 
-#[derive(Clone, Default, Debug, serde::Serialize)]
-pub struct CameraPositionNode {
+use crate::node::{NodeValue, NodeValueType, NodeView};
+
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct CameraPositionNode<T> {
     x: f32,
     y: f32,
     z: f32,
+    node_type: PhantomData<T>,
 }
 
-impl CameraPositionNode {
+impl<T> Default for CameraPositionNode<T> {
+    fn default() -> Self {
+        Self {
+            x: Default::default(),
+            y: Default::default(),
+            z: Default::default(),
+            node_type: Default::default(),
+        }
+    }
+}
+
+impl<T> CameraPositionNode<T> {
     pub fn value_mut(&mut self, index: usize) -> &mut f32 {
         if index == 0 {
             &mut self.x
@@ -29,7 +43,7 @@ const OUTPUTS: [(NodeValueType, &str); 4] = [
     (NodeValueType::Vec3, "xyz"),
 ];
 
-impl NodeView<Node> for CameraPositionNode {
+impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
     fn out_value(&self, index: usize) -> NodeValue {
         if index == 0 {
             NodeValue::F32(self.x)
@@ -62,7 +76,7 @@ impl NodeView<Node> for CameraPositionNode {
         false
     }
 
-    fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<Node>) {
+    fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<T>) {
         todo!()
     }
 
@@ -70,7 +84,7 @@ impl NodeView<Node> for CameraPositionNode {
         &mut self,
         _: &mut egui::Ui,
         _: usize,
-        _: &Vec<(usize, Node)>,
+        _: &Vec<(usize, T)>,
     ) -> egui_snarl::ui::PinInfo {
         unimplemented!();
     }
@@ -79,28 +93,33 @@ impl NodeView<Node> for CameraPositionNode {
         &mut self,
         ui: &mut egui::Ui,
         index: usize,
-        remotes: &Vec<(usize, Node)>,
+        remotes: &Vec<(usize, T)>,
     ) -> egui_snarl::ui::PinInfo {
-        ui.label(self.outputs()[index].1);
+        let (ty, label) = self.outputs()[index];
+        ui.label(label);
         if index < 3 {
             ui.add(egui::DragValue::new(self.value_mut(index)));
             if remotes.len() > 0 {
-                Node::get_pin_float_connected()
+                T::get_node_pin(ty, true)
             } else {
-                Node::get_pin_float_disconnected()
+                T::get_node_pin(ty, false)
             }
         } else {
             ui.label(self.out_value(index).to_string());
 
             if remotes.len() > 0 {
-                Node::get_pin_vec_connected()
+                T::get_node_pin(ty, true)
             } else {
-                Node::get_pin_vec_disconnected()
+                T::get_node_pin(ty, false)
             }
         }
     }
 
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<Node> {
+    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
+        unimplemented!()
+    }
+
+    fn get_node_pin(_ty: NodeValueType, _connected: bool) -> egui_snarl::ui::PinInfo {
         unimplemented!()
     }
 }

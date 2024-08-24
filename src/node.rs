@@ -21,6 +21,7 @@ pub trait NodeView<T> {
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo;
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<T>;
+    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
