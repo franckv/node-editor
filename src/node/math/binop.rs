@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Ops {
@@ -37,8 +37,23 @@ impl<T> Default for BinOpNode<T> {
     }
 }
 
-const INPUTS: [(NodeValueType, &str); 2] = [(NodeValueType::F32, "a"), (NodeValueType::F32, "b")];
-const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::F32, "result")];
+const INPUTS: [Connector; 2] = [
+    Connector {
+        ty: NodeValueType::F32,
+        label: "a",
+        editable: false,
+    },
+    Connector {
+        ty: NodeValueType::F32,
+        label: "b",
+        editable: false,
+    },
+];
+const OUTPUTS: [Connector; 1] = [Connector {
+    ty: NodeValueType::F32,
+    label: "result",
+    editable: false,
+}];
 
 impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
@@ -89,11 +104,11 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
         "Binary Op".to_string()
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         &OUTPUTS
     }
 
@@ -118,11 +133,12 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.inputs()[index];
+        let Connector { ty, label, .. } = self.inputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         if remotes.len() == 0 {
             ui.label("None");
-            T::get_node_pin(ty, false)
         } else {
             let (r_index, remote_node) = &remotes[0];
             let new_value = remote_node.out_value(*r_index);
@@ -130,8 +146,9 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
             self.in_value(index, new_value);
 
             ui.label(new_value.to_string());
-            T::get_node_pin(ty, true)
         }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_output(
@@ -140,14 +157,13 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.outputs()[index];
+        let Connector { ty, label, .. } = self.outputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         ui.label(self.out_value(index).to_string());
-        if remotes.len() > 0 {
-            T::get_node_pin(ty, true)
-        } else {
-            T::get_node_pin(ty, false)
-        }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {

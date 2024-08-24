@@ -17,8 +17,8 @@ pub trait NodeView<T> {
     fn out_value(&self, index: usize) -> NodeValue;
     fn in_value(&mut self, index: usize, value: NodeValue);
     fn title(&self) -> String;
-    fn inputs(&self) -> &[(NodeValueType, &str)];
-    fn outputs(&self) -> &[(NodeValueType, &str)];
+    fn inputs(&self) -> &[Connector];
+    fn outputs(&self) -> &[Connector];
     fn has_body(&self) -> bool;
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
     fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<(usize, T)>)
@@ -76,4 +76,10 @@ impl NodeValue {
             }
         }
     }
+}
+
+pub struct Connector {
+    pub ty: NodeValueType,
+    pub label: &'static str,
+    pub editable: bool,
 }

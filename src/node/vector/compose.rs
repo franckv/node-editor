@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ComposeNode<T> {
@@ -45,8 +45,23 @@ impl<T> ComposeNode<T> {
     }
 }
 
-const INPUTS: [(NodeValueType, &str); 2] = [(NodeValueType::F32, "x"), (NodeValueType::F32, "y")];
-const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::Vec2, "xy")];
+const INPUTS: [Connector; 2] = [
+    Connector {
+        ty: NodeValueType::F32,
+        label: "x",
+        editable: false,
+    },
+    Connector {
+        ty: NodeValueType::F32,
+        label: "y",
+        editable: false,
+    },
+];
+const OUTPUTS: [Connector; 1] = [Connector {
+    ty: NodeValueType::Vec2,
+    label: "xy",
+    editable: false,
+}];
 
 impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
@@ -84,11 +99,11 @@ impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
         "Compose".to_string()
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         &OUTPUTS
     }
 
@@ -106,11 +121,12 @@ impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.inputs()[index];
+        let Connector { ty, label, .. } = self.inputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         if remotes.len() == 0 {
             ui.label("None");
-            T::get_node_pin(ty, false)
         } else {
             let (r_index, remote_node) = &remotes[0];
             let new_value = remote_node.out_value(*r_index);
@@ -118,8 +134,9 @@ impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
             self.in_value(index, new_value);
 
             ui.label(new_value.to_string());
-            T::get_node_pin(ty, true)
         }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_output(
@@ -128,15 +145,13 @@ impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.outputs()[index];
+        let Connector { ty, label, .. } = self.outputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         ui.label(self.values().to_string());
 
-        if remotes.len() > 0 {
-            T::get_node_pin(ty, true)
-        } else {
-            T::get_node_pin(ty, false)
-        }
+        T::get_node_pin(ty, connected)
     }
 
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {

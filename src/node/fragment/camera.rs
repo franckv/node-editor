@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct CameraPositionNode<T> {
@@ -35,12 +35,28 @@ impl<T> CameraPositionNode<T> {
     }
 }
 
-const INPUTS: [(NodeValueType, &str); 0] = [];
-const OUTPUTS: [(NodeValueType, &str); 4] = [
-    (NodeValueType::F32, "x"),
-    (NodeValueType::F32, "y"),
-    (NodeValueType::F32, "z"),
-    (NodeValueType::Vec3, "xyz"),
+const INPUTS: [Connector; 0] = [];
+const OUTPUTS: [Connector; 4] = [
+    Connector {
+        ty: NodeValueType::F32,
+        label: "x",
+        editable: true,
+    },
+    Connector {
+        ty: NodeValueType::F32,
+        label: "y",
+        editable: true,
+    },
+    Connector {
+        ty: NodeValueType::F32,
+        label: "z",
+        editable: true,
+    },
+    Connector {
+        ty: NodeValueType::Vec3,
+        label: "xyz",
+        editable: false,
+    },
 ];
 
 impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
@@ -64,11 +80,11 @@ impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
         "CameraPosition".to_string()
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         &OUTPUTS
     }
 
@@ -95,24 +111,21 @@ impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> egui_snarl::ui::PinInfo {
-        let (ty, label) = self.outputs()[index];
+        let Connector {
+            ty,
+            label,
+            editable,
+        } = self.outputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
-        if index < 3 {
+        if editable {
             ui.add(egui::DragValue::new(self.value_mut(index)));
-            if remotes.len() > 0 {
-                T::get_node_pin(ty, true)
-            } else {
-                T::get_node_pin(ty, false)
-            }
         } else {
             ui.label(self.out_value(index).to_string());
-
-            if remotes.len() > 0 {
-                T::get_node_pin(ty, true)
-            } else {
-                T::get_node_pin(ty, false)
-            }
         }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {

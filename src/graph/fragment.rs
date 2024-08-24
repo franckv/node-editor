@@ -1,7 +1,7 @@
 use egui::Color32;
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{BinOpNode, CameraPositionNode, FloatNode};
+use crate::node::{BinOpNode, CameraPositionNode, Connector, FloatNode};
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
 type Node = FragmentNode;
@@ -38,7 +38,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         match self {
             Node::Float(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
@@ -46,7 +46,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         match self {
             Node::Float(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),

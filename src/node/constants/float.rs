@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FloatNode<T> {
@@ -25,8 +25,12 @@ impl<T> FloatNode<T> {
     }
 }
 
-const INPUTS: [(NodeValueType, &str); 0] = [];
-const OUTPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::F32, "x")];
+const INPUTS: [Connector; 0] = [];
+const OUTPUTS: [Connector; 1] = [Connector {
+    ty: NodeValueType::F32,
+    label: "x",
+    editable: true,
+}];
 
 impl<T: NodeView<T>> NodeView<T> for FloatNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
@@ -41,11 +45,11 @@ impl<T: NodeView<T>> NodeView<T> for FloatNode<T> {
         "Float".to_string()
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         &OUTPUTS
     }
 
@@ -67,14 +71,13 @@ impl<T: NodeView<T>> NodeView<T> for FloatNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.outputs()[index];
+        let Connector { ty, label, .. } = self.outputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         ui.add(egui::DragValue::new(self.value_mut()));
-        if remotes.len() > 0 {
-            T::get_node_pin(ty, true)
-        } else {
-            T::get_node_pin(ty, false)
-        }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {

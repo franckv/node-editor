@@ -1,7 +1,7 @@
 use egui::Color32;
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{BinOpNode, ComposeNode, FloatNode, OutputNode, Vec2Node};
+use crate::node::{BinOpNode, ComposeNode, Connector, FloatNode, OutputNode, Vec2Node};
 use crate::node::{NodeValue, NodeValueType, NodeView};
 
 type Node = MathNode;
@@ -46,7 +46,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         match self {
             Node::Output(value) => value.inputs(),
             Node::Float(value) => value.inputs(),
@@ -56,7 +56,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         match self {
             Node::Output(value) => value.outputs(),
             Node::Float(value) => value.outputs(),

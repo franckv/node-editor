@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use egui_snarl::ui::PinInfo;
 
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct OutputNode<T> {
@@ -17,8 +17,12 @@ impl<T> Default for OutputNode<T> {
     }
 }
 
-const INPUTS: [(NodeValueType, &str); 1] = [(NodeValueType::Any, "input")];
-const OUTPUTS: [(NodeValueType, &str); 0] = [];
+const INPUTS: [Connector; 1] = [Connector {
+    ty: NodeValueType::Any,
+    label: "input",
+    editable: false,
+}];
+const OUTPUTS: [Connector; 0] = [];
 
 impl<T: NodeView<T>> NodeView<T> for OutputNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
@@ -33,11 +37,11 @@ impl<T: NodeView<T>> NodeView<T> for OutputNode<T> {
         "Output".to_string()
     }
 
-    fn inputs(&self) -> &[(NodeValueType, &str)] {
+    fn inputs(&self) -> &[Connector] {
         &INPUTS
     }
 
-    fn outputs(&self) -> &[(NodeValueType, &str)] {
+    fn outputs(&self) -> &[Connector] {
         &OUTPUTS
     }
 
@@ -55,18 +59,20 @@ impl<T: NodeView<T>> NodeView<T> for OutputNode<T> {
         index: usize,
         remotes: &Vec<(usize, T)>,
     ) -> PinInfo {
-        let (ty, label) = self.inputs()[index];
+        let Connector { ty, label, .. } = self.inputs()[index];
+        let connected = remotes.len() > 0;
+
         ui.label(label);
         if remotes.len() == 0 {
             ui.label("None");
-            T::get_node_pin(ty, false)
         } else {
             let (r_index, remote) = &remotes[0];
             let new_value = remote.out_value(*r_index);
 
             ui.label(new_value.to_string());
-            T::get_node_pin(ty, true)
         }
+
+        T::get_node_pin(ty, connected)
     }
 
     fn show_output(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, T)>) -> PinInfo {
