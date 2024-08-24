@@ -1,7 +1,5 @@
 use std::marker::PhantomData;
 
-use egui_snarl::ui::PinInfo;
-
 use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -17,16 +15,6 @@ impl<T> Default for Vec2Node<T> {
             x: Default::default(),
             y: Default::default(),
             node_type: Default::default(),
-        }
-    }
-}
-
-impl<T> Vec2Node<T> {
-    pub fn value_mut(&mut self, index: usize) -> &mut f32 {
-        if index == 0 {
-            &mut self.x
-        } else {
-            &mut self.y
         }
     }
 }
@@ -61,6 +49,14 @@ impl<T: NodeView<T>> NodeView<T> for Vec2Node<T> {
         }
     }
 
+    fn f32_out_value_mut(&mut self, index: usize) -> &mut f32 {
+        if index == 0 {
+            &mut self.x
+        } else {
+            &mut self.y
+        }
+    }
+
     fn in_value(&mut self, _index: usize, _value: NodeValue) {
         unimplemented!()
     }
@@ -85,38 +81,7 @@ impl<T: NodeView<T>> NodeView<T> for Vec2Node<T> {
         unimplemented!();
     }
 
-    fn show_input(&mut self, _: &mut egui::Ui, _: usize, _: &Vec<(usize, T)>) -> PinInfo {
-        unimplemented!();
-    }
-
-    fn show_output(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, T)>,
-    ) -> PinInfo {
-        let Connector {
-            ty,
-            label,
-            editable,
-        } = self.outputs()[index];
-        let connected = remotes.len() > 0;
-
-        ui.label(label);
-        if editable {
-            ui.add(egui::DragValue::new(self.value_mut(index)));
-        } else {
-            ui.label(self.out_value(index).to_string());
-        }
-
-        T::get_node_pin(ty, connected)
-    }
-
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
-    }
-
-    fn get_node_pin(_ty: NodeValueType, _connected: bool) -> PinInfo {
-        unimplemented!()
     }
 }

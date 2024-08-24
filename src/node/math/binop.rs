@@ -1,7 +1,5 @@
 use std::marker::PhantomData;
 
-use egui_snarl::ui::PinInfo;
-
 use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -73,6 +71,10 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
         NodeValue::F32(value)
     }
 
+    fn f32_out_value_mut(&mut self, _index: usize) -> &mut f32 {
+        unimplemented!()
+    }
+
     fn in_value(&mut self, index: usize, value: NodeValue) {
         match value {
             NodeValue::None => unimplemented!(),
@@ -127,50 +129,7 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
             });
     }
 
-    fn show_input(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, T)>,
-    ) -> PinInfo {
-        let Connector { ty, label, .. } = self.inputs()[index];
-        let connected = remotes.len() > 0;
-
-        ui.label(label);
-        if remotes.len() == 0 {
-            ui.label("None");
-        } else {
-            let (r_index, remote_node) = &remotes[0];
-            let new_value = remote_node.out_value(*r_index);
-
-            self.in_value(index, new_value);
-
-            ui.label(new_value.to_string());
-        }
-
-        T::get_node_pin(ty, connected)
-    }
-
-    fn show_output(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, T)>,
-    ) -> PinInfo {
-        let Connector { ty, label, .. } = self.outputs()[index];
-        let connected = remotes.len() > 0;
-
-        ui.label(label);
-        ui.label(self.out_value(index).to_string());
-
-        T::get_node_pin(ty, connected)
-    }
-
     fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
-    }
-
-    fn get_node_pin(_ty: NodeValueType, _connected: bool) -> PinInfo {
-        unimplemented!()
     }
 }

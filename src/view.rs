@@ -1,9 +1,30 @@
-use egui::{Pos2, Ui};
-use egui_snarl::{ui::SnarlViewer, InPin, NodeId, OutPin, Snarl};
+use egui::{Color32, Pos2, Ui};
+use egui_snarl::{
+    ui::{PinInfo, SnarlViewer},
+    InPin, NodeId, OutPin, Snarl,
+};
 
 use crate::node::{Connector, NodeValueType, NodeView};
 
 pub struct NodeViewer;
+
+impl NodeViewer {
+    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo {
+        let color = if connected {
+            Color32::GREEN
+        } else {
+            Color32::RED
+        };
+
+        match ty {
+            NodeValueType::F32 => PinInfo::circle().with_fill(color),
+            NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Any => PinInfo::star().with_fill(color),
+            NodeValueType::None => unimplemented!(),
+        }
+    }
+}
 
 impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
     fn title(&mut self, node: &T) -> String {
@@ -39,8 +60,8 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let output = &snarl[from.id.node];
         let input = &snarl[to.id.node];
 
-        let Connector {ty: out_type, ..} = &output.outputs()[from.id.output];
-        let Connector {ty: in_type, ..} = &input.inputs()[to.id.input];
+        let Connector { ty: out_type, .. } = &output.outputs()[from.id.output];
+        let Connector { ty: in_type, .. } = &input.inputs()[to.id.input];
 
         if *in_type == NodeValueType::Any || *in_type == *out_type {
             for &remote in &to.remotes {
@@ -73,8 +94,24 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
             .collect::<Vec<(usize, T)>>();
 
         let node = &mut snarl[pin.id.node];
+        let index = pin.id.input;
 
-        node.show_input(ui, pin.id.input, &remotes)
+        let Connector { ty, label, .. } = node.inputs()[index];
+        let connected = remotes.len() > 0;
+
+        ui.label(label);
+        if remotes.len() == 0 {
+            ui.label("None");
+        } else {
+            let (remote_index, remote_node) = &remotes[0];
+            let remote_value = remote_node.out_value(*remote_index);
+
+            node.in_value(index, remote_value);
+
+            ui.label(remote_value.to_string());
+        }
+
+        Self::get_node_pin(ty, connected)
     }
 
     fn show_output(
@@ -91,8 +128,23 @@ impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
             .collect::<Vec<(usize, T)>>();
 
         let node = &mut snarl[pin.id.node];
+        let index = pin.id.output;
 
-        node.show_output(ui, pin.id.output, &remotes)
+        let Connector {
+            ty,
+            label,
+            editable,
+        } = node.outputs()[index];
+        let connected = remotes.len() > 0;
+
+        ui.label(label);
+        if editable && ty == NodeValueType::F32 {
+            ui.add(egui::DragValue::new(node.f32_out_value_mut(index)));
+        } else {
+            ui.label(node.out_value(index).to_string());
+        }
+
+        Self::get_node_pin(ty, connected)
     }
 
     fn has_graph_menu(&mut self, _pos: Pos2, _snarl: &mut Snarl<T>) -> bool {

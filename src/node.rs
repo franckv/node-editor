@@ -1,4 +1,3 @@
-use egui_snarl::ui::PinInfo;
 use glam::{Vec2, Vec3};
 
 pub mod constants;
@@ -15,22 +14,14 @@ pub use vector::ComposeNode;
 
 pub trait NodeView<T> {
     fn out_value(&self, index: usize) -> NodeValue;
+    fn f32_out_value_mut(&mut self, index: usize) -> &mut f32;
     fn in_value(&mut self, index: usize, value: NodeValue);
     fn title(&self) -> String;
     fn inputs(&self) -> &[Connector];
     fn outputs(&self) -> &[Connector];
     fn has_body(&self) -> bool;
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
-    fn show_input(&mut self, ui: &mut egui::Ui, index: usize, remotes: &Vec<(usize, T)>)
-        -> PinInfo;
-    fn show_output(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, T)>,
-    ) -> PinInfo;
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<T>;
-    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

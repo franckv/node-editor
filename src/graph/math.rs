@@ -1,8 +1,5 @@
-use egui::Color32;
-use egui_snarl::ui::PinInfo;
-
 use crate::node::{BinOpNode, ComposeNode, Connector, FloatNode, OutputNode, Vec2Node};
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{NodeValue, NodeView};
 
 type Node = MathNode;
 
@@ -23,6 +20,16 @@ impl NodeView<Node> for Node {
             Node::Vec2(value) => value.out_value(index),
             Node::BinOp(value) => value.out_value(index),
             Node::Compose(value) => value.out_value(index),
+        }
+    }
+
+    fn f32_out_value_mut(&mut self, index: usize) -> &mut f32 {
+        match self {
+            Node::Output(value) => value.f32_out_value_mut(index),
+            Node::Float(value) => value.f32_out_value_mut(index),
+            Node::Vec2(value) => value.f32_out_value_mut(index),
+            Node::BinOp(value) => value.f32_out_value_mut(index),
+            Node::Compose(value) => value.f32_out_value_mut(index),
         }
     }
 
@@ -86,36 +93,6 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn show_input(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, Node)>,
-    ) -> PinInfo {
-        match self {
-            Node::Output(value) => value.show_input(ui, index, remotes),
-            Node::Float(value) => value.show_input(ui, index, remotes),
-            Node::Vec2(value) => value.show_input(ui, index, remotes),
-            Node::BinOp(value) => value.show_input(ui, index, remotes),
-            Node::Compose(value) => value.show_input(ui, index, remotes),
-        }
-    }
-
-    fn show_output(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, Node)>,
-    ) -> PinInfo {
-        match self {
-            Node::Output(value) => value.show_output(ui, index, remotes),
-            Node::Float(value) => value.show_output(ui, index, remotes),
-            Node::Vec2(value) => value.show_output(ui, index, remotes),
-            Node::BinOp(value) => value.show_output(ui, index, remotes),
-            Node::Compose(value) => value.show_output(ui, index, remotes),
-        }
-    }
-
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<Node> {
         let mut result = None;
         ui.menu_button("Constants", |ui| {
@@ -139,21 +116,5 @@ impl NodeView<Node> for Node {
         });
 
         result
-    }
-
-    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo {
-        let color = if connected {
-            Color32::GREEN
-        } else {
-            Color32::RED
-        };
-
-        match ty {
-            NodeValueType::F32 => PinInfo::circle().with_fill(color),
-            NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
-            NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
-            NodeValueType::Any => PinInfo::star().with_fill(color),
-            NodeValueType::None => unimplemented!(),
-        }
     }
 }

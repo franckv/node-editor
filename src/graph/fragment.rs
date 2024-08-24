@@ -1,8 +1,5 @@
-use egui::Color32;
-use egui_snarl::ui::PinInfo;
-
 use crate::node::{BinOpNode, CameraPositionNode, Connector, FloatNode};
-use crate::node::{NodeValue, NodeValueType, NodeView};
+use crate::node::{NodeValue, NodeView};
 
 type Node = FragmentNode;
 
@@ -19,6 +16,14 @@ impl NodeView<Node> for Node {
             Node::Float(value) => value.out_value(index),
             Node::BinOp(value) => value.out_value(index),
             Node::CameraPosition(value) => value.out_value(index),
+        }
+    }
+
+    fn f32_out_value_mut(&mut self, index: usize) -> &mut f32 {
+        match self {
+            Node::Float(value) => value.f32_out_value_mut(index),
+            Node::BinOp(value) => value.f32_out_value_mut(index),
+            Node::CameraPosition(value) => value.f32_out_value_mut(index),
         }
     }
 
@@ -70,32 +75,6 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn show_input(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, Node)>,
-    ) -> PinInfo {
-        match self {
-            Node::Float(value) => value.show_input(ui, index, remotes),
-            Node::BinOp(value) => value.show_input(ui, index, remotes),
-            Node::CameraPosition(value) => value.show_input(ui, index, remotes),
-        }
-    }
-
-    fn show_output(
-        &mut self,
-        ui: &mut egui::Ui,
-        index: usize,
-        remotes: &Vec<(usize, Node)>,
-    ) -> PinInfo {
-        match self {
-            Node::Float(value) => value.show_output(ui, index, remotes),
-            Node::BinOp(value) => value.show_output(ui, index, remotes),
-            Node::CameraPosition(value) => value.show_output(ui, index, remotes),
-        }
-    }
-
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<Node> {
         let mut result = None;
         if ui.button("Float").clicked() {
@@ -113,22 +92,6 @@ impl NodeView<Node> for Node {
         });
 
         result
-    }
-
-    fn get_node_pin(ty: NodeValueType, connected: bool) -> PinInfo {
-        let color = if connected {
-            Color32::GREEN
-        } else {
-            Color32::RED
-        };
-
-        match ty {
-            NodeValueType::F32 => PinInfo::circle().with_fill(color),
-            NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
-            NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
-            NodeValueType::Any => PinInfo::star().with_fill(color),
-            NodeValueType::None => unimplemented!(),
-        }
     }
 }
 
