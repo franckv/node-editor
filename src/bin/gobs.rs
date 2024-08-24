@@ -16,7 +16,7 @@ use gobs::{
     ui::UIRenderer,
 };
 
-use node_editor::{node::math::MathNode, ui::NodeUI};
+use node_editor::{graph::MathNode, ui::NodeUI};
 
 struct App {
     graph: FrameGraph,

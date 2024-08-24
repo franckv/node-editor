@@ -1,8 +1,17 @@
 use egui_snarl::ui::PinInfo;
 use glam::{Vec2, Vec3};
 
+pub mod constants;
+pub mod display;
 pub mod fragment;
 pub mod math;
+pub mod vector;
+
+pub use constants::{FloatNode, Vec2Node};
+pub use display::OutputNode;
+pub use fragment::CameraPositionNode;
+pub use math::BinOpNode;
+pub use vector::ComposeNode;
 
 pub trait NodeView<T> {
     fn out_value(&self, index: usize) -> NodeValue;

@@ -1,7 +1,7 @@
 use tracing::Level;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter, FmtSubscriber};
 
-use node_editor::{node::fragment::FragmentNode, ui::NodeUI};
+use node_editor::{graph::FragmentNode, ui::NodeUI};
 
 #[derive(Default)]
 struct App {
