@@ -22,7 +22,7 @@ const INPUTS: [Connector; 1] = [Connector {
 }];
 const OUTPUTS: [Connector; 0] = [];
 
-impl<T: NodeView<T>> NodeView<T> for OutputNode<T> {
+impl<T> NodeView<T> for OutputNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
         NodeValue::None
     }
@@ -50,10 +50,6 @@ impl<T: NodeView<T>> NodeView<T> for OutputNode<T> {
     }
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
-        unimplemented!();
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
     }
 }

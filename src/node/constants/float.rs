@@ -24,7 +24,7 @@ const OUTPUTS: [Connector; 1] = [Connector {
     editable: true,
 }];
 
-impl<T: NodeView<T>> NodeView<T> for FloatNode<T> {
+impl<T> NodeView<T> for FloatNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
         NodeValue::F32(self.value)
     }
@@ -54,10 +54,6 @@ impl<T: NodeView<T>> NodeView<T> for FloatNode<T> {
     }
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
-        unimplemented!();
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
     }
 }

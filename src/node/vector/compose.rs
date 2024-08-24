@@ -37,7 +37,7 @@ const OUTPUTS: [Connector; 1] = [Connector {
     editable: false,
 }];
 
-impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
+impl<T> NodeView<T> for ComposeNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
         NodeValue::Vec2((self.x, self.y).into())
     }
@@ -90,10 +90,6 @@ impl<T: NodeView<T>> NodeView<T> for ComposeNode<T> {
     }
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
-        unimplemented!();
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
     }
 }

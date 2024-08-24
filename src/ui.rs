@@ -2,7 +2,10 @@ use std::fs;
 
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
-use crate::{node::NodeView, view::NodeViewer};
+use crate::{
+    node::{GraphView, NodeView},
+    view::NodeViewer,
+};
 
 const SAVE_FOLDER: &str = "data";
 
@@ -26,7 +29,9 @@ impl<T> Default for NodeUI<T> {
     }
 }
 
-impl<T: NodeView<T> + Clone + serde::Serialize + for<'a> serde::Deserialize<'a>> NodeUI<T> {
+impl<T: NodeView<T> + GraphView<T> + Clone + serde::Serialize + for<'a> serde::Deserialize<'a>>
+    NodeUI<T>
+{
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
         egui::CentralPanel::default().show(ectx, |ui| {
             egui::menu::bar(ui, |ui| {

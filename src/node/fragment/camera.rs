@@ -45,7 +45,7 @@ const OUTPUTS: [Connector; 4] = [
     },
 ];
 
-impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
+impl<T> NodeView<T> for CameraPositionNode<T> {
     fn out_value(&self, index: usize) -> NodeValue {
         if index == 0 {
             NodeValue::F32(self.x)
@@ -92,9 +92,5 @@ impl<T: NodeView<T>> NodeView<T> for CameraPositionNode<T> {
 
     fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<T>) {
         todo!()
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
-        unimplemented!()
     }
 }

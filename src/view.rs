@@ -4,7 +4,7 @@ use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
 };
 
-use crate::node::{Connector, NodeValueType, NodeView};
+use crate::node::{Connector, GraphView, NodeValueType, NodeView};
 
 pub struct NodeViewer;
 
@@ -26,7 +26,7 @@ impl NodeViewer {
     }
 }
 
-impl<T: NodeView<T> + Clone> SnarlViewer<T> for NodeViewer {
+impl<T: NodeView<T> + GraphView<T> + Clone> SnarlViewer<T> for NodeViewer {
     fn title(&mut self, node: &T) -> String {
         node.title()
     }

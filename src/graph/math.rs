@@ -1,5 +1,5 @@
 use crate::node::{BinOpNode, ComposeNode, Connector, FloatNode, OutputNode, Vec2Node};
-use crate::node::{NodeValue, NodeView};
+use crate::node::{GraphView, NodeValue, NodeView};
 
 type Node = MathNode;
 
@@ -92,7 +92,9 @@ impl NodeView<Node> for Node {
             Node::Compose(value) => value.show_body(ui, inputs),
         }
     }
+}
 
+impl GraphView<Node> for Node {
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<Node> {
         let mut result = None;
         ui.menu_button("Constants", |ui| {

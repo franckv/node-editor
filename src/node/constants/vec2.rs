@@ -38,7 +38,7 @@ const OUTPUTS: [Connector; 3] = [
     },
 ];
 
-impl<T: NodeView<T>> NodeView<T> for Vec2Node<T> {
+impl<T> NodeView<T> for Vec2Node<T> {
     fn out_value(&self, index: usize) -> NodeValue {
         if index == 0 {
             NodeValue::F32(self.x)
@@ -78,10 +78,6 @@ impl<T: NodeView<T>> NodeView<T> for Vec2Node<T> {
     }
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
-        unimplemented!();
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
         unimplemented!();
     }
 }

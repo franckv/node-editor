@@ -21,6 +21,9 @@ pub trait NodeView<T> {
     fn outputs(&self) -> &[Connector];
     fn has_body(&self) -> bool;
     fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
+}
+
+pub trait GraphView<T> {
     fn show_graph_menu(ui: &mut egui::Ui) -> Option<T>;
 }
 

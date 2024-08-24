@@ -53,7 +53,7 @@ const OUTPUTS: [Connector; 1] = [Connector {
     editable: false,
 }];
 
-impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
+impl<T> NodeView<T> for BinOpNode<T> {
     fn out_value(&self, _index: usize) -> NodeValue {
         let value = match self.op {
             Ops::Add => self.a + self.b,
@@ -127,9 +127,5 @@ impl<T: NodeView<T>> NodeView<T> for BinOpNode<T> {
                 ui.selectable_value(&mut self.op, Ops::Mul, "Mul");
                 ui.selectable_value(&mut self.op, Ops::Div, "Div");
             });
-    }
-
-    fn show_graph_menu(_: &mut egui::Ui) -> Option<T> {
-        unimplemented!();
     }
 }
