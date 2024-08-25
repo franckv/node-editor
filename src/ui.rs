@@ -2,10 +2,7 @@ use std::fs;
 
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
-use crate::{
-    node::{GraphView, NodeView},
-    view::NodeViewer,
-};
+use crate::{graph::GraphView, node::NodeView, view::NodeViewer};
 
 const SAVE_FOLDER: &str = "data";
 

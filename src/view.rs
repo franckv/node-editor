@@ -4,7 +4,10 @@ use egui_snarl::{
     InPin, NodeId, OutPin, Snarl,
 };
 
-use crate::node::{Connector, GraphView, NodeValueType, NodeView};
+use crate::{
+    graph::GraphView,
+    node::{Connector, NodeValueType, NodeView},
+};
 
 pub struct NodeViewer;
 

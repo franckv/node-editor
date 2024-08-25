@@ -1,5 +1,6 @@
+use crate::graph::GraphView;
 use crate::node::{BinOpNode, ComposeNode, Connector, FloatNode, OutputNode, Vec2Node};
-use crate::node::{GraphView, NodeValue, NodeView};
+use crate::node::{NodeValue, NodeView};
 
 type Node = MathNode;
 
