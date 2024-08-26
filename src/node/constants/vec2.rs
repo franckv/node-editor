@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
+use crate::{
+    compiler::{NodeCompile, NodeParam},
+    node::{Connector, NodeValue, NodeValueType, NodeView},
+};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Vec2Node<T> {
@@ -79,5 +82,22 @@ impl<T> NodeView<T> for Vec2Node<T> {
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
         unimplemented!();
+    }
+}
+
+const VAR_NAME: &str = "vec_";
+
+impl<T> NodeCompile<T> for Vec2Node<T> {
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
+        NodeParam {
+            name: format!("{}{}.{}", VAR_NAME, id, OUTPUTS[index].label),
+            ty: OUTPUTS[index].ty,
+        }
+    }
+
+    fn code(&self, id: usize, _input_vars: &Vec<Option<NodeParam>>) -> String {
+        let var = format!("{}{}", VAR_NAME, id);
+
+        format!("vec2 {} = vec2({:.2}, {:.2});", var, self.x, self.y)
     }
 }
