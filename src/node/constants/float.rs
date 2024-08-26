@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    compiler::NodeCompile,
+    compiler::{NodeCompile, NodeParam},
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
@@ -62,14 +62,17 @@ impl<T> NodeView<T> for FloatNode<T> {
 }
 
 impl<T> NodeCompile<T> for FloatNode<T> {
-    fn out_vars(&self, id: usize, _index: usize) -> String {
-        format!("float_{}", id)
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
+        NodeParam {
+            name: format!("float_{}", id),
+            ty: OUTPUTS[index].ty,
+        }
     }
 
-    fn code(&self, id: usize, _input_vars: &Vec<Option<String>>) -> String {
+    fn code(&self, id: usize, _input_vars: &Vec<Option<NodeParam>>) -> String {
         let var = &self.out_vars(id, 0);
 
-        let code = format!("float {} = {:.2};", var, self.value);
+        let code = format!("float {} = {:.2};", &var.name, self.value);
 
         code
     }

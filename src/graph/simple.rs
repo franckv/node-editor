@@ -1,4 +1,4 @@
-use crate::compiler::NodeCompile;
+use crate::compiler::{NodeCompile, NodeParam};
 use crate::graph::GraphView;
 use crate::node::{BinOpNode, Connector, FloatNode};
 use crate::node::{NodeValue, NodeView};
@@ -86,17 +86,17 @@ impl GraphView<Node> for Node {
 }
 
 impl NodeCompile<Node> for Node {
-    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
-        match self {
-            Node::Float(value) => value.code(id, input_vars),
-            Node::BinOp(value) => value.code(id, input_vars),
-        }
-    }
-
-    fn out_vars(&self, id: usize, index: usize) -> String {
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         match self {
             Node::Float(value) => value.out_vars(id, index),
             Node::BinOp(value) => value.out_vars(id, index),
+        }
+    }
+
+    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
+        match self {
+            Node::Float(value) => value.code(id, input_vars),
+            Node::BinOp(value) => value.code(id, input_vars),
         }
     }
 }

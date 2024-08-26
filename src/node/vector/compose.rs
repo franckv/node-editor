@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    compiler::NodeCompile,
+    compiler::{NodeCompile, NodeParam},
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
@@ -97,19 +97,24 @@ impl<T> NodeView<T> for ComposeNode<T> {
     }
 }
 
+const VAR_NAME: &str = "compose_";
+
 impl<T> NodeCompile<T> for ComposeNode<T> {
-    fn out_vars(&self, id: usize, index: usize) -> String {
-        format!("compose_{}.{}", id, OUTPUTS[index].label)
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
+        NodeParam {
+            name: format!("{}{}.{}", VAR_NAME, id, OUTPUTS[index].label),
+            ty: OUTPUTS[index].ty,
+        }
     }
 
-    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
+    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
         let input_x = input_vars.get(0).expect("2 args");
         let input_y = input_vars.get(1).expect("2 args");
 
-        let var = format!("compose_{}", id);
+        let var = format!("{}{}", VAR_NAME, id);
 
         let code = if let (Some(x), Some(y)) = (input_x, input_y) {
-            format!("vec2 {} = vec2({}, {});", var, x, y)
+            format!("vec2 {} = vec2({}, {});", var, &x.name, &y.name)
         } else {
             "".to_string()
         };

@@ -2,13 +2,15 @@ use std::collections::HashMap;
 
 use egui_snarl::Snarl;
 
-use crate::node::NodeView;
+use crate::node::{NodeValueType, NodeView};
 use crate::utils::sort;
 
-pub struct GraphCompiler {}
+pub struct GraphCompiler;
 
 impl GraphCompiler {
-    pub fn compile<T: NodeView<T> + NodeCompile<T>>(&self, snarl: &Snarl<T>) {
+    pub fn compile<T: NodeView<T> + NodeCompile<T>>(snarl: &Snarl<T>) -> String {
+        let mut code = String::from("");
+
         let mut index_mapping = HashMap::new();
 
         let nodes = snarl
@@ -61,13 +63,20 @@ impl GraphCompiler {
                     inputs.push(None);
                 }
             }
-            let code = node.code(i, &inputs);
-            tracing::info!("{}", code);
+            code += &node.code(i, &inputs);
+            code += "\n";
         }
+
+        code
     }
 }
 
+pub struct NodeParam {
+    pub name: String,
+    pub ty: NodeValueType,
+}
+
 pub trait NodeCompile<T> {
-    fn out_vars(&self, id: usize, index: usize) -> String;
-    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String;
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam;
+    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String;
 }

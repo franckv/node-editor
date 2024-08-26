@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    compiler::NodeCompile,
+    compiler::{NodeCompile, NodeParam},
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
@@ -134,11 +134,14 @@ impl<T> NodeView<T> for BinOpNode<T> {
 }
 
 impl<T> NodeCompile<T> for BinOpNode<T> {
-    fn out_vars(&self, id: usize, _index: usize) -> String {
-        format!("{:?}_{}", self.op, id).to_lowercase()
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
+        NodeParam {
+            name: format!("{:?}_{}", self.op, id).to_lowercase(),
+            ty: OUTPUTS[index].ty,
+        }
     }
 
-    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
+    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
         let input_a = input_vars.get(0).expect("2 args");
         let input_b = input_vars.get(1).expect("2 args");
 
@@ -152,7 +155,7 @@ impl<T> NodeCompile<T> for BinOpNode<T> {
         };
 
         let code = if let (Some(a), Some(b)) = (input_a, input_b) {
-            format!("float {} = {} {} {};", var, a, op, b)
+            format!("float {} = {} {} {};", &var.name, &a.name, op, &b.name)
         } else {
             "".to_string()
         };

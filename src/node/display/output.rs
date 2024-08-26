@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    compiler::NodeCompile,
+    compiler::{NodeCompile, NodeParam},
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
@@ -58,11 +58,11 @@ impl<T> NodeView<T> for OutputNode<T> {
 }
 
 impl<T> NodeCompile<T> for OutputNode<T> {
-    fn out_vars(&self, _id: usize, _index: usize) -> String {
+    fn out_vars(&self, _id: usize, _index: usize) -> NodeParam {
         unimplemented!()
     }
 
-    fn code(&self, _id: usize, _input_vars: &Vec<Option<String>>) -> String {
+    fn code(&self, _id: usize, _input_vars: &Vec<Option<NodeParam>>) -> String {
         "".to_string()
     }
 }

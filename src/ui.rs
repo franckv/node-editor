@@ -49,7 +49,9 @@ impl<
         egui::Window::new("Script")
             .open(&mut self.show_script)
             .show(ectx, |ui| {
-                ui.label("Script");
+                let mut code = GraphCompiler::compile(&self.snarl);
+
+                ui.text_edit_multiline(&mut code);
             });
     }
 
@@ -82,12 +84,6 @@ impl<
 
             if ui.button("Show script").clicked() {
                 self.show_script = true;
-            }
-
-            if ui.button("Compile").clicked() {
-                let compiler = GraphCompiler {};
-
-                compiler.compile(&self.snarl);
             }
         });
     }

@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 
 use crate::{
-    compiler::NodeCompile,
+    compiler::{NodeCompile, NodeParam},
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
@@ -85,13 +85,18 @@ impl<T> NodeView<T> for Vec2Node<T> {
     }
 }
 
+const VAR_NAME: &str = "vec_";
+
 impl<T> NodeCompile<T> for Vec2Node<T> {
-    fn out_vars(&self, id: usize, index: usize) -> String {
-        format!("vec_{}.{}", id, OUTPUTS[index].label)
+    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
+        NodeParam {
+            name: format!("{}{}.{}", VAR_NAME, id, OUTPUTS[index].label),
+            ty: OUTPUTS[index].ty,
+        }
     }
 
-    fn code(&self, id: usize, _input_vars: &Vec<Option<String>>) -> String {
-        let var = format!("vec_{}", id);
+    fn code(&self, id: usize, _input_vars: &Vec<Option<NodeParam>>) -> String {
+        let var = format!("{}{}", VAR_NAME, id);
 
         format!("vec2 {} = vec2({:.2}, {:.2});", var, self.x, self.y)
     }
