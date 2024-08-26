@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
+use crate::{
+    compiler::NodeCompile,
+    node::{Connector, NodeValue, NodeValueType, NodeView},
+};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct CameraPositionNode<T> {
@@ -92,5 +95,20 @@ impl<T> NodeView<T> for CameraPositionNode<T> {
 
     fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<T>) {
         todo!()
+    }
+}
+
+impl<T> NodeCompile<T> for CameraPositionNode<T> {
+    fn out_vars(&self, id: usize, index: usize) -> String {
+        format!("camera_{}.{}", id, OUTPUTS[index].label)
+    }
+
+    fn code(&self, id: usize, _input_vars: &Vec<Option<String>>) -> String {
+        let var = format!("camera_{}", id);
+
+        format!(
+            "vec3 {} = vec3({:.2}, {:.2}, {:.2});",
+            var, self.x, self.y, self.z
+        )
     }
 }

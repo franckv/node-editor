@@ -1,14 +1,14 @@
+use crate::compiler::NodeCompile;
 use crate::graph::GraphView;
-use crate::node::{BinOpNode, CameraPositionNode, Connector, FloatNode};
+use crate::node::{BinOpNode, Connector, FloatNode};
 use crate::node::{NodeValue, NodeView};
 
-type Node = FragmentNode;
+type Node = SimpleNode;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub enum FragmentNode {
+pub enum SimpleNode {
     Float(FloatNode<Self>),
     BinOp(BinOpNode<Self>),
-    CameraPosition(CameraPositionNode<Self>),
 }
 
 impl NodeView<Node> for Node {
@@ -16,7 +16,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.out_value(index),
             Node::BinOp(value) => value.out_value(index),
-            Node::CameraPosition(value) => value.out_value(index),
         }
     }
 
@@ -24,7 +23,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.f32_out_value_mut(index),
             Node::BinOp(value) => value.f32_out_value_mut(index),
-            Node::CameraPosition(value) => value.f32_out_value_mut(index),
         }
     }
 
@@ -32,7 +30,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.in_value(index, new_value),
             Node::BinOp(value) => value.in_value(index, new_value),
-            Node::CameraPosition(value) => value.in_value(index, new_value),
         }
     }
 
@@ -40,7 +37,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.title(),
             Node::BinOp(value) => value.title(),
-            Node::CameraPosition(value) => value.title(),
         }
     }
 
@@ -48,7 +44,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
-            Node::CameraPosition(value) => value.inputs(),
         }
     }
 
@@ -56,7 +51,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),
-            Node::CameraPosition(value) => value.outputs(),
         }
     }
 
@@ -64,7 +58,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.has_body(),
             Node::BinOp(value) => value.has_body(),
-            Node::CameraPosition(value) => value.has_body(),
         }
     }
 
@@ -72,7 +65,6 @@ impl NodeView<Node> for Node {
         match self {
             Node::Float(value) => value.show_body(ui, inputs),
             Node::BinOp(value) => value.show_body(ui, inputs),
-            Node::CameraPosition(value) => value.show_body(ui, inputs),
         }
     }
 }
@@ -83,11 +75,6 @@ impl GraphView<Node> for Node {
         if ui.button("Float").clicked() {
             result = Some(Node::Float(FloatNode::default()));
         }
-        ui.menu_button("Inputs", |ui| {
-            if ui.button("CameraPos").clicked() {
-                result = Some(Node::CameraPosition(CameraPositionNode::default()));
-            }
-        });
         ui.menu_button("Operations", |ui| {
             if ui.button("BinOp").clicked() {
                 result = Some(Node::BinOp(BinOpNode::default()));
@@ -98,8 +85,18 @@ impl GraphView<Node> for Node {
     }
 }
 
-impl Node {
-    pub fn format_float(value: f32) -> String {
-        format!("{}", (value * 100.).round() / 100.)
+impl NodeCompile<Node> for Node {
+    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
+        match self {
+            Node::Float(value) => value.code(id, input_vars),
+            Node::BinOp(value) => value.code(id, input_vars),
+        }
+    }
+
+    fn out_vars(&self, id: usize, index: usize) -> String {
+        match self {
+            Node::Float(value) => value.out_vars(id, index),
+            Node::BinOp(value) => value.out_vars(id, index),
+        }
     }
 }

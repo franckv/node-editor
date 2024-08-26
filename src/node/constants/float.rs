@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
+use crate::{
+    compiler::NodeCompile,
+    node::{Connector, NodeValue, NodeValueType, NodeView},
+};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct FloatNode<T> {
@@ -55,5 +58,19 @@ impl<T> NodeView<T> for FloatNode<T> {
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
         unimplemented!();
+    }
+}
+
+impl<T> NodeCompile<T> for FloatNode<T> {
+    fn out_vars(&self, id: usize, _index: usize) -> String {
+        format!("float_{}", id)
+    }
+
+    fn code(&self, id: usize, _input_vars: &Vec<Option<String>>) -> String {
+        let var = &self.out_vars(id, 0);
+
+        let code = format!("float {} = {:.2};", var, self.value);
+
+        code
     }
 }

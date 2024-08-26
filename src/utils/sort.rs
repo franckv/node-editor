@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-pub fn sort_bfs<T>(nodes: &Vec<T>, edges: Vec<(usize, usize)>) -> Vec<usize> {
+pub fn sort_bfs<T>(nodes: &Vec<T>, edges: &Vec<(usize, usize, usize, usize)>) -> Vec<usize> {
     let mut sorted = Vec::new();
 
     let mut adjacent = (0..nodes.len())
@@ -8,7 +8,7 @@ pub fn sort_bfs<T>(nodes: &Vec<T>, edges: Vec<(usize, usize)>) -> Vec<usize> {
         .collect::<Vec<Vec<usize>>>();
     let mut incoming: Vec<usize> = (0..nodes.len()).map(|_| 0).collect::<Vec<usize>>();
 
-    for &(src, dst) in &edges {
+    for &(src, _src_idx, dst, _dst_idx) in edges {
         adjacent[src].push(dst);
         incoming[dst] += 1;
     }
@@ -37,14 +37,14 @@ pub fn sort_bfs<T>(nodes: &Vec<T>, edges: Vec<(usize, usize)>) -> Vec<usize> {
     sorted
 }
 
-pub fn sort_dfs<T>(nodes: &Vec<T>, edges: Vec<(usize, usize)>) -> Vec<usize> {
+pub fn sort_dfs<T>(nodes: &Vec<T>, edges: &Vec<(usize, usize, usize, usize)>) -> Vec<usize> {
     let mut visited = (0..nodes.len()).map(|_| false).collect::<Vec<bool>>();
 
     let mut adjacent = (0..nodes.len())
         .map(|_| Vec::new())
         .collect::<Vec<Vec<usize>>>();
 
-    for &(src, dst) in &edges {
+    for &(src, _src_idx, dst, _dst_idx) in edges {
         adjacent[src].push(dst);
     }
 

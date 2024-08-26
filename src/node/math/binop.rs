@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
+use crate::{
+    compiler::NodeCompile,
+    node::{Connector, NodeValue, NodeValueType, NodeView},
+};
 
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Ops {
@@ -127,5 +130,33 @@ impl<T> NodeView<T> for BinOpNode<T> {
                 ui.selectable_value(&mut self.op, Ops::Mul, "Mul");
                 ui.selectable_value(&mut self.op, Ops::Div, "Div");
             });
+    }
+}
+
+impl<T> NodeCompile<T> for BinOpNode<T> {
+    fn out_vars(&self, id: usize, _index: usize) -> String {
+        format!("{:?}_{}", self.op, id).to_lowercase()
+    }
+
+    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
+        let input_a = input_vars.get(0).expect("2 args");
+        let input_b = input_vars.get(1).expect("2 args");
+
+        let var = &self.out_vars(id, 0);
+
+        let op = match self.op {
+            Ops::Add => "+",
+            Ops::Sub => "-",
+            Ops::Mul => "*",
+            Ops::Div => "/",
+        };
+
+        let code = if let (Some(a), Some(b)) = (input_a, input_b) {
+            format!("float {} = {} {} {};", var, a, op, b)
+        } else {
+            "".to_string()
+        };
+
+        code
     }
 }

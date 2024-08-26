@@ -2,7 +2,12 @@ use std::fs;
 
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
-use crate::{compiler::GraphCompiler, graph::GraphView, node::NodeView, view::NodeViewer};
+use crate::{
+    compiler::{GraphCompiler, NodeCompile},
+    graph::GraphView,
+    node::NodeView,
+    view::NodeViewer,
+};
 
 pub struct NodeUI<T> {
     snarl: Snarl<T>,
@@ -20,8 +25,14 @@ impl<T> Default for NodeUI<T> {
     }
 }
 
-impl<T: NodeView<T> + GraphView<T> + Clone + serde::Serialize + for<'a> serde::Deserialize<'a>>
-    NodeUI<T>
+impl<
+        T: NodeView<T>
+            + GraphView<T>
+            + NodeCompile<T>
+            + Clone
+            + serde::Serialize
+            + for<'a> serde::Deserialize<'a>,
+    > NodeUI<T>
 {
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
         egui::CentralPanel::default().show(ectx, |ui| {

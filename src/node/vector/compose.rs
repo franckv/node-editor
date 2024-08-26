@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
+use crate::{
+    compiler::NodeCompile,
+    node::{Connector, NodeValue, NodeValueType, NodeView},
+};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ComposeNode<T> {
@@ -91,5 +94,26 @@ impl<T> NodeView<T> for ComposeNode<T> {
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
         unimplemented!();
+    }
+}
+
+impl<T> NodeCompile<T> for ComposeNode<T> {
+    fn out_vars(&self, id: usize, index: usize) -> String {
+        format!("compose_{}.{}", id, OUTPUTS[index].label)
+    }
+
+    fn code(&self, id: usize, input_vars: &Vec<Option<String>>) -> String {
+        let input_x = input_vars.get(0).expect("2 args");
+        let input_y = input_vars.get(1).expect("2 args");
+
+        let var = format!("compose_{}", id);
+
+        let code = if let (Some(x), Some(y)) = (input_x, input_y) {
+            format!("vec2 {} = vec2({}, {});", var, x, y)
+        } else {
+            "".to_string()
+        };
+
+        code
     }
 }
