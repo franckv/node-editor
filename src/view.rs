@@ -160,6 +160,7 @@ impl<T: NodeView<T> + GraphView<T> + Clone> SnarlViewer<T> for NodeViewer {
         let node = T::show_graph_menu(ui);
         if let Some(node) = node {
             snarl.insert_node(pos, node);
+
             ui.close_menu();
         }
     }
