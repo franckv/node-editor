@@ -1,4 +1,5 @@
 use crate::compiler::{NodeCompile, NodeParam};
+use crate::node::vector::Dim;
 use crate::node::{
     math::Ops, BinOpNode, CameraPositionNode, ComposeNode, FloatNode, NodeView, OutputNode,
     Vec2Node,
@@ -104,7 +105,7 @@ const COMP_VAR_NAME: &str = "compose_";
 impl<T> NodeCompile<T, ShaderCompiler> for ComposeNode<T> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         NodeParam {
-            name: format!("{}{}.{}", COMP_VAR_NAME, id, self.outputs()[index].label),
+            name: format!("{}{}", COMP_VAR_NAME, id),
             ty: self.outputs()[index].ty,
         }
     }
@@ -116,9 +117,36 @@ impl<T> NodeCompile<T, ShaderCompiler> for ComposeNode<T> {
         let var = format!("{}{}", COMP_VAR_NAME, id);
 
         let code = if let (Some(x), Some(y)) = (input_x, input_y) {
-            format!("vec2 {} = vec2({}, {});", var, &x.name, &y.name)
+            match self.dim {
+                Dim::Vec2 => {
+                    format!("vec2 {} = vec2({}, {});", var, &x.name, &y.name)
+                }
+                Dim::Vec3 => {
+                    let input_z = input_vars.get(2).expect("3 args");
+                    if let Some(z) = input_z {
+                        format!(
+                            "vec3 {} = vec3({}, {}, {});",
+                            var, &x.name, &y.name, &z.name
+                        )
+                    } else {
+                        String::from("")
+                    }
+                }
+                Dim::Vec4 => {
+                    let input_z = input_vars.get(2).expect("4 args");
+                    let input_w = input_vars.get(3).expect("4 args");
+                    if let (Some(z), Some(w)) = (input_z, input_w) {
+                        format!(
+                            "vec4 {} = vec4({}, {}, {}, {});",
+                            var, &x.name, &y.name, &z.name, &w.name
+                        )
+                    } else {
+                        String::from("")
+                    }
+                }
+            }
         } else {
-            "".to_string()
+            String::from("")
         };
 
         code
