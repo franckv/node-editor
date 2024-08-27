@@ -93,8 +93,8 @@ impl<T> NodeView<T> for CameraPositionNode<T> {
         false
     }
 
-    fn show_body(&mut self, _: &mut egui::Ui, _: &Vec<T>) {
-        todo!()
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
+        unimplemented!()
     }
 }
 

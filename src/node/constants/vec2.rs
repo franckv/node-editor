@@ -80,7 +80,7 @@ impl<T> NodeView<T> for Vec2Node<T> {
         false
     }
 
-    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
         unimplemented!();
     }
 }

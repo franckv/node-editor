@@ -56,7 +56,7 @@ impl<T> NodeView<T> for FloatNode<T> {
         false
     }
 
-    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) {
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
         unimplemented!();
     }
 }

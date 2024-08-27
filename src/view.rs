@@ -23,6 +23,7 @@ impl NodeViewer {
             NodeValueType::F32 => PinInfo::circle().with_fill(color),
             NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
             NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Vec4 => PinInfo::triangle().with_fill(color),
             NodeValueType::Any => PinInfo::star().with_fill(color),
             NodeValueType::None => unimplemented!(),
         }
@@ -42,20 +43,38 @@ impl<T: NodeView<T> + GraphView<T> + Clone> SnarlViewer<T> for NodeViewer {
         &mut self,
         node: NodeId,
         inputs: &[InPin],
-        _outputs: &[OutPin],
+        outputs: &[OutPin],
         ui: &mut Ui,
         _scale: f32,
         snarl: &mut Snarl<T>,
     ) {
-        let inputs = inputs
+        let node_inputs = inputs
             .iter()
             .flat_map(|pin| pin.remotes.iter().map(|remote| snarl[remote.node].clone()))
             .collect::<Vec<T>>();
 
         let node = &mut snarl[node];
 
-        if node.has_body() {
-            node.show_body(ui, &inputs);
+        let changed = if node.has_body() {
+            node.show_body(ui, &node_inputs)
+        } else {
+            false
+        };
+
+        if changed {
+            let n = node.inputs().len();
+
+            for input in inputs {
+                if input.id.input >= n {
+                    snarl.drop_inputs(input.id);
+                }
+            }
+
+            for output in outputs {
+                if output.id.output >= n {
+                    snarl.drop_outputs(output.id);
+                }
+            }
         }
     }
 

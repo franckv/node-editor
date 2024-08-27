@@ -61,7 +61,7 @@ impl NodeView<Node> for Node {
         }
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<Node>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<Node>) -> bool {
         match self {
             Node::Float(value) => value.show_body(ui, inputs),
             Node::BinOp(value) => value.show_body(ui, inputs),

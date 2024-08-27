@@ -5,7 +5,7 @@ use crate::{
     node::{Connector, NodeValue, NodeValueType, NodeView},
 };
 
-#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Ops {
     Add,
     Sub,
@@ -80,7 +80,6 @@ impl<T> NodeView<T> for BinOpNode<T> {
 
     fn in_value(&mut self, index: usize, value: NodeValue) {
         match value {
-            NodeValue::None => unimplemented!(),
             NodeValue::F32(value) => {
                 if index == 0 {
                     self.a = value;
@@ -88,20 +87,7 @@ impl<T> NodeView<T> for BinOpNode<T> {
                     self.b = value;
                 }
             }
-            NodeValue::Vec2(value) => {
-                if index == 0 {
-                    self.a = value.x;
-                } else {
-                    self.b = value.y;
-                }
-            }
-            NodeValue::Vec3(value) => {
-                if index == 0 {
-                    self.a = value.x;
-                } else {
-                    self.b = value.y;
-                }
-            }
+            _ => unimplemented!(),
         }
     }
 
@@ -121,7 +107,9 @@ impl<T> NodeView<T> for BinOpNode<T> {
         true
     }
 
-    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<T>) {
+    fn show_body(&mut self, ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
+        let old_op = self.op;
+
         egui::ComboBox::from_label("")
             .selected_text(format!("{:?}", self.op))
             .show_ui(ui, |ui| {
@@ -130,6 +118,8 @@ impl<T> NodeView<T> for BinOpNode<T> {
                 ui.selectable_value(&mut self.op, Ops::Mul, "Mul");
                 ui.selectable_value(&mut self.op, Ops::Div, "Div");
             });
+
+        self.op != old_op
     }
 }
 

@@ -1,4 +1,4 @@
-use glam::{Vec2, Vec3};
+use glam::{Vec2, Vec3, Vec4};
 
 pub mod constants;
 pub mod display;
@@ -20,7 +20,7 @@ pub trait NodeView<T> {
     fn inputs(&self) -> &[Connector];
     fn outputs(&self) -> &[Connector];
     fn has_body(&self) -> bool;
-    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>);
+    fn show_body(&mut self, ui: &mut egui::Ui, inputs: &Vec<T>) -> bool;
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -28,6 +28,7 @@ pub enum NodeValueType {
     F32,
     Vec2,
     Vec3,
+    Vec4,
     Any,
     None,
 }
@@ -37,6 +38,7 @@ pub enum NodeValue {
     F32(f32),
     Vec2(Vec2),
     Vec3(Vec3),
+    Vec4(Vec4),
     None,
 }
 
@@ -62,6 +64,15 @@ impl NodeValue {
                     Self::format_float(value.x),
                     Self::format_float(value.y),
                     Self::format_float(value.z)
+                )
+            }
+            NodeValue::Vec4(value) => {
+                format!(
+                    "({}, {}, {}, {})",
+                    Self::format_float(value.x),
+                    Self::format_float(value.y),
+                    Self::format_float(value.z),
+                    Self::format_float(value.w)
                 )
             }
         }
