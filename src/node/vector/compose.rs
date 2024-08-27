@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{
-    compiler::{NodeCompile, NodeParam},
-    node::{Connector, NodeValue, NodeValueType, NodeView},
-};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Dim {
@@ -14,11 +11,11 @@ pub enum Dim {
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ComposeNode<T> {
-    x: f32,
-    y: f32,
-    z: f32,
-    w: f32,
-    dim: Dim,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+    pub dim: Dim,
     node_type: PhantomData<T>,
 }
 
@@ -141,31 +138,5 @@ impl<T> NodeView<T> for ComposeNode<T> {
             });
 
         self.dim != old_dim
-    }
-}
-
-const VAR_NAME: &str = "compose_";
-
-impl<T> NodeCompile<T> for ComposeNode<T> {
-    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
-        NodeParam {
-            name: format!("{}{}.{}", VAR_NAME, id, OUTPUTS[index].label),
-            ty: OUTPUTS[index].ty,
-        }
-    }
-
-    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
-        let input_x = input_vars.get(0).expect("2 args");
-        let input_y = input_vars.get(1).expect("2 args");
-
-        let var = format!("{}{}", VAR_NAME, id);
-
-        let code = if let (Some(x), Some(y)) = (input_x, input_y) {
-            format!("vec2 {} = vec2({}, {});", var, &x.name, &y.name)
-        } else {
-            "".to_string()
-        };
-
-        code
     }
 }

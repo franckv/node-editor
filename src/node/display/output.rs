@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{
-    compiler::{NodeCompile, NodeParam},
-    node::{Connector, NodeValue, NodeValueType, NodeView},
-};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct OutputNode<T> {
@@ -54,15 +51,5 @@ impl<T> NodeView<T> for OutputNode<T> {
 
     fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
         unimplemented!();
-    }
-}
-
-impl<T> NodeCompile<T> for OutputNode<T> {
-    fn out_vars(&self, _id: usize, _index: usize) -> NodeParam {
-        unimplemented!()
-    }
-
-    fn code(&self, _id: usize, _input_vars: &Vec<Option<NodeParam>>) -> String {
-        "".to_string()
     }
 }

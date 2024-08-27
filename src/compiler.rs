@@ -1,14 +1,29 @@
+mod shader;
+
+pub use shader::ShaderCompiler;
+
 use std::collections::HashMap;
+use std::marker::PhantomData;
 
 use egui_snarl::Snarl;
 
 use crate::node::{NodeValueType, NodeView};
 use crate::utils::sort;
 
-pub struct GraphCompiler;
+pub struct GraphCompiler<G> {
+    compiler_type: PhantomData<G>,
+}
 
-impl GraphCompiler {
-    pub fn compile<T: NodeView<T> + NodeCompile<T>>(snarl: &Snarl<T>) -> String {
+impl<G> Default for GraphCompiler<G> {
+    fn default() -> Self {
+        Self {
+            compiler_type: Default::default(),
+        }
+    }
+}
+
+impl<G> GraphCompiler<G> {
+    pub fn compile<T: NodeView<T> + NodeCompile<T, G>>(&self, snarl: &Snarl<T>) -> String {
         let mut code = String::from("");
 
         let mut index_mapping = HashMap::new();
@@ -76,7 +91,7 @@ pub struct NodeParam {
     pub ty: NodeValueType,
 }
 
-pub trait NodeCompile<T> {
+pub trait NodeCompile<T, G> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam;
     fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String;
 }

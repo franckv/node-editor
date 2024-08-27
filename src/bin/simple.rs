@@ -1,11 +1,11 @@
 use tracing::Level;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter, FmtSubscriber};
 
-use node_editor::{graph::SimpleNode, ui::NodeUI};
+use node_editor::{compiler::ShaderCompiler, graph::SimpleNode, ui::NodeUI};
 
 #[derive(Default)]
 struct App {
-    node_ui: NodeUI<SimpleNode>,
+    node_ui: NodeUI<SimpleNode, ShaderCompiler>,
 }
 
 impl eframe::App for App {

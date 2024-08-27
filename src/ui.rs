@@ -9,17 +9,19 @@ use crate::{
     view::NodeViewer,
 };
 
-pub struct NodeUI<T> {
+pub struct NodeUI<T, G> {
     snarl: Snarl<T>,
     style: SnarlStyle,
+    compiler: GraphCompiler<G>,
     show_script: bool,
 }
 
-impl<T> Default for NodeUI<T> {
+impl<T, G> Default for NodeUI<T, G> {
     fn default() -> Self {
         Self {
             snarl: Default::default(),
             style: Default::default(),
+            compiler: Default::default(),
             show_script: false,
         }
     }
@@ -28,11 +30,12 @@ impl<T> Default for NodeUI<T> {
 impl<
         T: NodeView<T>
             + GraphView<T>
-            + NodeCompile<T>
+            + NodeCompile<T, G>
             + Clone
             + serde::Serialize
             + for<'a> serde::Deserialize<'a>,
-    > NodeUI<T>
+        G,
+    > NodeUI<T, G>
 {
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
         egui::CentralPanel::default().show(ectx, |ui| {
@@ -49,7 +52,7 @@ impl<
         egui::Window::new("Script")
             .open(&mut self.show_script)
             .show(ectx, |ui| {
-                let mut code = GraphCompiler::compile(&self.snarl);
+                let mut code = self.compiler.compile(&self.snarl);
 
                 ui.text_edit_multiline(&mut code);
             });

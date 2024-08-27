@@ -1,3 +1,3 @@
 mod binop;
 
-pub use binop::BinOpNode;
+pub use binop::{BinOpNode, Ops};

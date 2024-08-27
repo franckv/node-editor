@@ -1,9 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{
-    compiler::{NodeCompile, NodeParam},
-    node::{Connector, NodeValue, NodeValueType, NodeView},
-};
+use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum Ops {
@@ -120,36 +117,5 @@ impl<T> NodeView<T> for BinOpNode<T> {
             });
 
         self.op != old_op
-    }
-}
-
-impl<T> NodeCompile<T> for BinOpNode<T> {
-    fn out_vars(&self, id: usize, index: usize) -> NodeParam {
-        NodeParam {
-            name: format!("{:?}_{}", self.op, id).to_lowercase(),
-            ty: OUTPUTS[index].ty,
-        }
-    }
-
-    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
-        let input_a = input_vars.get(0).expect("2 args");
-        let input_b = input_vars.get(1).expect("2 args");
-
-        let var = &self.out_vars(id, 0);
-
-        let op = match self.op {
-            Ops::Add => "+",
-            Ops::Sub => "-",
-            Ops::Mul => "*",
-            Ops::Div => "/",
-        };
-
-        let code = if let (Some(a), Some(b)) = (input_a, input_b) {
-            format!("float {} = {} {} {};", &var.name, &a.name, op, &b.name)
-        } else {
-            "".to_string()
-        };
-
-        code
     }
 }

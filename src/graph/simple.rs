@@ -85,7 +85,7 @@ impl GraphView<Node> for Node {
     }
 }
 
-impl NodeCompile<Node> for Node {
+impl<G> NodeCompile<Node, G> for Node {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         match self {
             Node::Float(value) => value.out_vars(id, index),
