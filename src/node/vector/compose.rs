@@ -1,13 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::node::{Connector, NodeValue, NodeValueType, NodeView};
-
-#[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
-pub enum Dim {
-    Vec2,
-    Vec3,
-    Vec4,
-}
+use crate::node::{Connector, Dim, NodeValue, NodeValueType, NodeView};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct ComposeNode<T> {

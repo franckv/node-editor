@@ -6,7 +6,7 @@ pub mod fragment;
 pub mod math;
 pub mod vector;
 
-pub use constants::{FloatNode, Vec2Node};
+pub use constants::{Dim, FloatNode, VecNode};
 pub use display::OutputNode;
 pub use fragment::CameraPositionNode;
 pub use math::BinOpNode;

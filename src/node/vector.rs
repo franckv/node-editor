@@ -1,3 +1,3 @@
 mod compose;
 
-pub use compose::{ComposeNode, Dim};
+pub use compose::ComposeNode;

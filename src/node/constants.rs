@@ -1,5 +1,5 @@
 mod float;
-mod vec2;
+mod vec;
 
 pub use float::FloatNode;
-pub use vec2::Vec2Node;
+pub use vec::{Dim, VecNode};

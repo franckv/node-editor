@@ -1,12 +1,9 @@
-use crate::compiler::{NodeCompile, NodeParam};
-use crate::node::vector::Dim;
+use crate::compiler::{CodeFragment, NodeCompile, NodeParam};
 use crate::node::{
-    math::Ops, BinOpNode, CameraPositionNode, ComposeNode, FloatNode, NodeView, OutputNode,
-    Vec2Node,
+    math::Ops, BinOpNode, CameraPositionNode, ComposeNode, Dim, FloatNode, NodeView, OutputNode,
+    VecNode,
 };
 use crate::template::Template;
-
-use super::CodeFragment;
 
 pub struct ShaderCompiler;
 
@@ -51,9 +48,11 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for FloatNode<T> {
 }
 
 const VEC_VAR_NAME: &str = "{type}_{id}.{label}";
-const VEC_TEMPLATE: &str = "vec2 {type}_{id} = vec2({x}, {y});";
+const VEC_TEMPLATE2: &str = "vec2 {type}_{id} = vec2({x}, {y});";
+const VEC_TEMPLATE3: &str = "vec3 {type}_{id} = vec3({x}, {y}, {z});";
+const VEC_TEMPLATE4: &str = "vec4 {type}_{id} = vec4({x}, {y}, {z}, {w});";
 
-impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for Vec2Node<T> {
+impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for VecNode<T> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         NodeParam {
             name: Template::builder(VEC_VAR_NAME)
@@ -70,15 +69,38 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for Vec2Node<T> {
         id: usize,
         _input_vars: &Vec<Option<NodeParam>>,
     ) -> Vec<CodeFragment<ShaderSection>> {
-        vec![CodeFragment {
-            code: Template::builder(VEC_TEMPLATE)
-                .param("type", "vec")
-                .param("id", id)
-                .float("x", self.x)
-                .float("y", self.y)
-                .build(),
-            section: ShaderSection::Code,
-        }]
+        match self.dim {
+            Dim::Vec2 => vec![CodeFragment {
+                code: Template::builder(VEC_TEMPLATE2)
+                    .param("type", "vec")
+                    .param("id", id)
+                    .float("x", self.x)
+                    .float("y", self.y)
+                    .build(),
+                section: ShaderSection::Code,
+            }],
+            Dim::Vec3 => vec![CodeFragment {
+                code: Template::builder(VEC_TEMPLATE3)
+                    .param("type", "vec")
+                    .param("id", id)
+                    .float("x", self.x)
+                    .float("y", self.y)
+                    .float("z", self.z)
+                    .build(),
+                section: ShaderSection::Code,
+            }],
+            Dim::Vec4 => vec![CodeFragment {
+                code: Template::builder(VEC_TEMPLATE4)
+                    .param("type", "vec")
+                    .param("id", id)
+                    .float("x", self.x)
+                    .float("y", self.y)
+                    .float("z", self.z)
+                    .float("w", self.w)
+                    .build(),
+                section: ShaderSection::Code,
+            }],
+        }
     }
 }
 
