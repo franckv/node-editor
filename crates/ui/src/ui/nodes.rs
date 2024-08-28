@@ -1,6 +1,7 @@
 use node_model::{
-    math::Ops, vector::DecomposeNode, BinOpNode, CameraPositionNode, ComposeNode, Dim, FloatNode,
-    OutputNode, VecNode, VertexInNode,
+    math::{OneMinusNode, Ops},
+    vector::DecomposeNode,
+    BinOpNode, CameraPositionNode, ComposeNode, Dim, FloatNode, OutputNode, VecNode, VertexInNode,
 };
 
 use crate::view::NodeView;
@@ -73,6 +74,16 @@ impl<T> NodeView<T> for BinOpNode<T> {
             });
 
         self.op != old_op
+    }
+}
+
+impl<T> NodeView<T> for OneMinusNode<T> {
+    fn has_body(&self) -> bool {
+        false
+    }
+
+    fn show_body(&mut self, _ui: &mut egui::Ui, _inputs: &Vec<T>) -> bool {
+        unimplemented!();
     }
 }
 

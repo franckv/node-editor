@@ -34,21 +34,19 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for BinOpNode<T> {
             Ops::Div => "/",
         };
 
-        let code = if let (Some(a), Some(b)) = (input_a, input_b) {
-            Template::builder(BINOP_TEMPLATE)
-                .param_dbg("prefix", self.op)
-                .param("id", id)
-                .param("a", &a.name)
-                .param("b", &b.name)
-                .param("op_sym", op)
-                .build()
+        if let (Some(a), Some(b)) = (input_a, input_b) {
+            vec![CodeFragment {
+                code: Template::builder(BINOP_TEMPLATE)
+                    .param_dbg("prefix", self.op)
+                    .param("id", id)
+                    .param("a", &a.name)
+                    .param("b", &b.name)
+                    .param("op_sym", op)
+                    .build(),
+                section: ShaderSection::Main,
+            }]
         } else {
-            "".to_string()
-        };
-
-        vec![CodeFragment {
-            code: code,
-            section: ShaderSection::Main,
-        }]
+            vec![]
+        }
     }
 }

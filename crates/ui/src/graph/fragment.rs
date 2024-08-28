@@ -1,8 +1,8 @@
 use node_compiler::{CodeFragment, NodeCompile, NodeParam, ShaderCompiler, ShaderSection};
 
 use node_model::{
-    vector::DecomposeNode, BinOpNode, ComposeNode, Connector, FloatNode, NodeData, NodeValue,
-    OutputNode, VecNode, VertexInNode,
+    math::OneMinusNode, vector::DecomposeNode, BinOpNode, ComposeNode, Connector, FloatNode,
+    NodeData, NodeValue, OutputNode, VecNode, VertexInNode,
 };
 
 use crate::{graph::GraphView, view::NodeView};
@@ -15,6 +15,7 @@ pub enum FragmentShaderNode {
     Float(FloatNode<Self>),
     Vec(VecNode<Self>),
     BinOp(BinOpNode<Self>),
+    OneMinus(OneMinusNode<Self>),
     Compose(ComposeNode<Self>),
     Decompose(DecomposeNode<Self>),
     VertexInput(VertexInNode<Self>),
@@ -27,6 +28,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.out_value(index),
             Node::Vec(value) => value.out_value(index),
             Node::BinOp(value) => value.out_value(index),
+            Node::OneMinus(value) => value.out_value(index),
             Node::Compose(value) => value.out_value(index),
             Node::Decompose(value) => value.out_value(index),
             Node::VertexInput(value) => value.out_value(index),
@@ -39,6 +41,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.f32_out_value_mut(index),
             Node::Vec(value) => value.f32_out_value_mut(index),
             Node::BinOp(value) => value.f32_out_value_mut(index),
+            Node::OneMinus(value) => value.f32_out_value_mut(index),
             Node::Compose(value) => value.f32_out_value_mut(index),
             Node::Decompose(value) => value.f32_out_value_mut(index),
             Node::VertexInput(value) => value.f32_out_value_mut(index),
@@ -51,6 +54,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.in_value(index, new_value),
             Node::Vec(value) => value.in_value(index, new_value),
             Node::BinOp(value) => value.in_value(index, new_value),
+            Node::OneMinus(value) => value.in_value(index, new_value),
             Node::Compose(value) => value.in_value(index, new_value),
             Node::Decompose(value) => value.in_value(index, new_value),
             Node::VertexInput(value) => value.in_value(index, new_value),
@@ -63,6 +67,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.title(),
             Node::Vec(value) => value.title(),
             Node::BinOp(value) => value.title(),
+            Node::OneMinus(value) => value.title(),
             Node::Compose(value) => value.title(),
             Node::Decompose(value) => value.title(),
             Node::VertexInput(value) => value.title(),
@@ -75,6 +80,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.inputs(),
             Node::Vec(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
+            Node::OneMinus(value) => value.inputs(),
             Node::Compose(value) => value.inputs(),
             Node::Decompose(value) => value.inputs(),
             Node::VertexInput(value) => value.inputs(),
@@ -87,6 +93,7 @@ impl NodeData<Node> for Node {
             Node::Float(value) => value.outputs(),
             Node::Vec(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),
+            Node::OneMinus(value) => value.outputs(),
             Node::Compose(value) => value.outputs(),
             Node::Decompose(value) => value.outputs(),
             Node::VertexInput(value) => value.outputs(),
@@ -101,6 +108,7 @@ impl NodeView<Node> for Node {
             Node::Float(value) => value.has_body(),
             Node::Vec(value) => value.has_body(),
             Node::BinOp(value) => value.has_body(),
+            Node::OneMinus(value) => value.has_body(),
             Node::Compose(value) => value.has_body(),
             Node::Decompose(value) => value.has_body(),
             Node::VertexInput(value) => value.has_body(),
@@ -113,6 +121,7 @@ impl NodeView<Node> for Node {
             Node::Float(value) => value.show_body(ui, inputs),
             Node::Vec(value) => value.show_body(ui, inputs),
             Node::BinOp(value) => value.show_body(ui, inputs),
+            Node::OneMinus(value) => value.show_body(ui, inputs),
             Node::Compose(value) => value.show_body(ui, inputs),
             Node::Decompose(value) => value.show_body(ui, inputs),
             Node::VertexInput(value) => value.show_body(ui, inputs),
@@ -143,6 +152,9 @@ impl GraphView<Node> for Node {
             if ui.button("BinOp").clicked() {
                 result = Some(Node::BinOp(BinOpNode::default()));
             }
+            if ui.button("OneMinus").clicked() {
+                result = Some(Node::OneMinus(OneMinusNode::default()));
+            }
             if ui.button("Compose").clicked() {
                 result = Some(Node::Compose(ComposeNode::default()));
             }
@@ -162,6 +174,7 @@ impl NodeCompile<Node, ShaderCompiler, ShaderSection> for Node {
             Node::Float(value) => value.out_vars(id, index),
             Node::Vec(value) => value.out_vars(id, index),
             Node::BinOp(value) => value.out_vars(id, index),
+            Node::OneMinus(value) => value.out_vars(id, index),
             Node::Compose(value) => value.out_vars(id, index),
             Node::Decompose(value) => value.out_vars(id, index),
             Node::VertexInput(value) => value.out_vars(id, index),
@@ -178,6 +191,7 @@ impl NodeCompile<Node, ShaderCompiler, ShaderSection> for Node {
             Node::Float(value) => value.code(id, input_vars),
             Node::Vec(value) => value.code(id, input_vars),
             Node::BinOp(value) => value.code(id, input_vars),
+            Node::OneMinus(value) => value.code(id, input_vars),
             Node::Compose(value) => value.code(id, input_vars),
             Node::Decompose(value) => value.code(id, input_vars),
             Node::VertexInput(value) => value.code(id, input_vars),
