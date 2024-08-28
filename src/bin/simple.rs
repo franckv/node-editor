@@ -1,11 +1,8 @@
 use tracing::Level;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter, FmtSubscriber};
 
-use node_editor::{
-    compiler::{ShaderCompiler, ShaderSection},
-    graph::SimpleNode,
-    ui::NodeUI,
-};
+use node_compiler::{ShaderCompiler, ShaderSection};
+use node_ui::{NodeUI, SimpleNode};
 
 #[derive(Default)]
 struct App {

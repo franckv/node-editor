@@ -1,0 +1,9 @@
+[package]
+name = "node-compiler"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+egui-snarl = { workspace = true }
+node-model = { workspace = true }
+tracing = { workspace = true }
