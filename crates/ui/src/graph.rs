@@ -1,7 +1,7 @@
-mod math;
+mod fragment;
 mod simple;
 
-pub use math::MathNode;
+pub use fragment::FragmentShaderNode;
 pub use simple::SimpleNode;
 
 pub trait GraphView<T> {

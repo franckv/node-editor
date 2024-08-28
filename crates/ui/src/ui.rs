@@ -4,8 +4,8 @@ use std::{fmt::Debug, fs};
 
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
+use node_compiler::{GraphCompiler, NodeCompile, ScriptGenerator};
 use node_model::NodeData;
-use node_compiler::{GraphCompiler, NodeCompile};
 
 use crate::{
     graph::GraphView,
@@ -38,7 +38,7 @@ impl<
             + Clone
             + serde::Serialize
             + for<'a> serde::Deserialize<'a>,
-        G,
+        G: ScriptGenerator<S>,
         S: Debug,
     > NodeUI<T, G, S>
 {
@@ -59,10 +59,8 @@ impl<
             .show(ectx, |ui| {
                 let code = self.compiler.compile(&self.snarl);
 
-                let mut script = String::from("");
-                for fragment in code {
-                    script += &format!("[{:?}] {}\n", &fragment.section, &fragment.code);
-                }
+                let mut script = G::script(&code);
+
                 ui.text_edit_multiline(&mut script);
             });
     }

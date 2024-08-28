@@ -17,12 +17,12 @@ use gobs::{
 };
 
 use node_compiler::{ShaderCompiler, ShaderSection};
-use node_ui::{MathNode, NodeUI};
+use node_ui::{FragmentShaderNode, NodeUI};
 
 struct App {
     graph: FrameGraph,
     ui: UIRenderer,
-    node_ui: NodeUI<MathNode, ShaderCompiler, ShaderSection>,
+    node_ui: NodeUI<FragmentShaderNode, ShaderCompiler, ShaderSection>,
 }
 
 impl Run for App {

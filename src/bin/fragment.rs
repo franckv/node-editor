@@ -2,11 +2,11 @@ use tracing::Level;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter, FmtSubscriber};
 
 use node_compiler::{ShaderCompiler, ShaderSection};
-use node_ui::{MathNode, NodeUI};
+use node_ui::{FragmentShaderNode, NodeUI};
 
 #[derive(Default)]
 struct App {
-    node_ui: NodeUI<MathNode, ShaderCompiler, ShaderSection>,
+    node_ui: NodeUI<FragmentShaderNode, ShaderCompiler, ShaderSection>,
 }
 
 impl eframe::App for App {

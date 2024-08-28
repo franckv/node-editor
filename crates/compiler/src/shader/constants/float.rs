@@ -5,14 +5,15 @@ use crate::{
     utils::Template,
 };
 
-const FLOAT_VAR_NAME: &str = "{type}_{id}";
-const FLOAT_TEMPLATE: &str = "float {type}_{id} = {x};";
+const FLOAT_PREFIX: &str = "float";
+const FLOAT_VAR_NAME: &str = "{prefix}_{id}";
+const FLOAT_TEMPLATE: &str = "float {prefix}_{id} = {x};";
 
 impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for FloatNode<T> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         NodeParam {
             name: Template::builder(FLOAT_VAR_NAME)
-                .param("type", "float")
+                .param("prefix", FLOAT_PREFIX)
                 .param("id", id)
                 .build(),
             ty: self.outputs()[index].ty,
@@ -26,7 +27,7 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for FloatNode<T> {
     ) -> Vec<CodeFragment<ShaderSection>> {
         vec![CodeFragment {
             code: Template::builder(FLOAT_TEMPLATE)
-                .param("type", "float")
+                .param("prefix", FLOAT_PREFIX)
                 .param("id", id)
                 .float("x", self.value)
                 .build(),

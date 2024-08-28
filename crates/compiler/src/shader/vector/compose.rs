@@ -5,16 +5,17 @@ use crate::{
     utils::Template,
 };
 
-const COMP_VAR_NAME: &str = "{type}_{id}";
-const COMP_TEMPLATE2: &str = "vec2 {type}_{id} = vec2({x}, {y});";
-const COMP_TEMPLATE3: &str = "vec3 {type}_{id} = vec3({x}, {y}, {z});";
-const COMP_TEMPLATE4: &str = "vec4 {type}_{id} = vec4({x}, {y}, {z}, {w});";
+const COMP_PREFIX: &str = "comp";
+const COMP_VAR_NAME: &str = "{prefix}_{id}";
+const COMP_TEMPLATE2: &str = "vec2 {prefix}_{id} = vec2({x}, {y});";
+const COMP_TEMPLATE3: &str = "vec3 {prefix}_{id} = vec3({x}, {y}, {z});";
+const COMP_TEMPLATE4: &str = "vec4 {prefix}_{id} = vec4({x}, {y}, {z}, {w});";
 
 impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for ComposeNode<T> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         NodeParam {
             name: Template::builder(COMP_VAR_NAME)
-                .param("type", "comp")
+                .param("prefix", COMP_PREFIX)
                 .param("id", id)
                 .build(),
             ty: self.outputs()[index].ty,
@@ -33,7 +34,7 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for ComposeNode<T> {
             match self.dim {
                 Dim::Vec2 => vec![CodeFragment {
                     code: Template::builder(COMP_TEMPLATE2)
-                        .param("type", "comp")
+                        .param("prefix", COMP_PREFIX)
                         .param("id", id)
                         .param("x", &x.name)
                         .param("y", &y.name)
@@ -45,7 +46,7 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for ComposeNode<T> {
                     if let Some(z) = input_z {
                         vec![CodeFragment {
                             code: Template::builder(COMP_TEMPLATE3)
-                                .param("type", "comp")
+                                .param("prefix", COMP_PREFIX)
                                 .param("id", id)
                                 .param("x", &x.name)
                                 .param("y", &y.name)
@@ -63,7 +64,7 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for ComposeNode<T> {
                     if let (Some(z), Some(w)) = (input_z, input_w) {
                         vec![CodeFragment {
                             code: Template::builder(COMP_TEMPLATE4)
-                                .param("type", "comp")
+                                .param("prefix", COMP_PREFIX)
                                 .param("id", id)
                                 .param("x", &x.name)
                                 .param("y", &y.name)

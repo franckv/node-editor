@@ -5,14 +5,14 @@ use crate::{
     utils::Template,
 };
 
-const BINOP_VAR_NAME: &str = "{op_name}_{id}";
-const BINOP_TEMPLATE: &str = "float {op_name}_{id} = {a} {op_sym} {b};";
+const BINOP_VAR_NAME: &str = "{prefix}_{id}";
+const BINOP_TEMPLATE: &str = "float {prefix}_{id} = {a} {op_sym} {b};";
 
 impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for BinOpNode<T> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         NodeParam {
             name: Template::builder(BINOP_VAR_NAME)
-                .param_dbg("op_name", self.op)
+                .param_dbg("prefix", self.op)
                 .param("id", id)
                 .build(),
             ty: self.outputs()[index].ty,
@@ -36,7 +36,7 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for BinOpNode<T> {
 
         let code = if let (Some(a), Some(b)) = (input_a, input_b) {
             Template::builder(BINOP_TEMPLATE)
-                .param_dbg("op_name", self.op)
+                .param_dbg("prefix", self.op)
                 .param("id", id)
                 .param("a", &a.name)
                 .param("b", &b.name)

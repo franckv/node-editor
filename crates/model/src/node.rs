@@ -1,15 +1,15 @@
-use glam::{Vec2, Vec3, Vec4};
+use glam::{Mat4, Vec2, Vec3, Vec4};
 
 pub mod constants;
-pub mod outputs;
 pub mod inputs;
 pub mod math;
+pub mod outputs;
 pub mod vector;
 
 pub use constants::{Dim, FloatNode, VecNode};
-pub use outputs::OutputNode;
-pub use inputs::CameraPositionNode;
+pub use inputs::{CameraPositionNode, VertexInNode};
 pub use math::BinOpNode;
+pub use outputs::OutputNode;
 pub use vector::ComposeNode;
 
 pub trait NodeData<T> {
@@ -27,6 +27,7 @@ pub enum NodeValueType {
     Vec2,
     Vec3,
     Vec4,
+    Mat4,
     Any,
     None,
 }
@@ -37,6 +38,7 @@ pub enum NodeValue {
     Vec2(Vec2),
     Vec3(Vec3),
     Vec4(Vec4),
+    Mat4(Mat4),
     None,
 }
 
@@ -72,6 +74,9 @@ impl NodeValue {
                     Self::format_float(value.z),
                     Self::format_float(value.w)
                 )
+            }
+            NodeValue::Mat4(_value) => {
+                format!("Mat4",)
             }
         }
     }

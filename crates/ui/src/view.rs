@@ -28,6 +28,7 @@ impl NodeViewer {
             NodeValueType::Vec2 => PinInfo::triangle().with_fill(color),
             NodeValueType::Vec3 => PinInfo::triangle().with_fill(color),
             NodeValueType::Vec4 => PinInfo::triangle().with_fill(color),
+            NodeValueType::Mat4 => PinInfo::square().with_fill(color),
             NodeValueType::Any => PinInfo::star().with_fill(color),
             NodeValueType::None => unimplemented!(),
         }

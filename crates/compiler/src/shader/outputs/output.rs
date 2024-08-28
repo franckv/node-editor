@@ -6,6 +6,7 @@ use crate::{
 };
 
 const OUTPUT_TEMPLATE_DECL: &str = "layout(location = 0) out vec4 out_color;";
+const OUTPUT_TEMPLATE_CODE1: &str = "out_color = vec4({var}, 0.0, 0.0, 1.0);";
 const OUTPUT_TEMPLATE_CODE2: &str = "out_color = vec4({var}, 0.0, 1.0);";
 const OUTPUT_TEMPLATE_CODE3: &str = "out_color = vec4({var}, 1.0);";
 const OUTPUT_TEMPLATE_CODE4: &str = "out_color = {var};";
@@ -31,12 +32,11 @@ impl<T> NodeCompile<T, ShaderCompiler, ShaderSection> for OutputNode<T> {
 
         if let Some(input) = input {
             let template = match input.ty {
-                NodeValueType::F32 => unimplemented!(),
+                NodeValueType::F32 => OUTPUT_TEMPLATE_CODE1,
                 NodeValueType::Vec2 => OUTPUT_TEMPLATE_CODE2,
                 NodeValueType::Vec3 => OUTPUT_TEMPLATE_CODE3,
                 NodeValueType::Vec4 => OUTPUT_TEMPLATE_CODE4,
-                NodeValueType::Any => unimplemented!(),
-                NodeValueType::None => unimplemented!(),
+                _ => unimplemented!(),
             };
             code.push(CodeFragment {
                 code: Template::builder(template)

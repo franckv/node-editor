@@ -1,20 +1,23 @@
 use node_compiler::{CodeFragment, NodeCompile, NodeParam, ShaderCompiler, ShaderSection};
 
 use node_model::{
-    BinOpNode, ComposeNode, Connector, FloatNode, NodeData, NodeValue, OutputNode, VecNode,
+    vector::DecomposeNode, BinOpNode, ComposeNode, Connector, FloatNode, NodeData, NodeValue,
+    OutputNode, VecNode, VertexInNode,
 };
 
 use crate::{graph::GraphView, view::NodeView};
 
-type Node = MathNode;
+type Node = FragmentShaderNode;
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
-pub enum MathNode {
+pub enum FragmentShaderNode {
     Output(OutputNode<Self>),
     Float(FloatNode<Self>),
     Vec(VecNode<Self>),
     BinOp(BinOpNode<Self>),
     Compose(ComposeNode<Self>),
+    Decompose(DecomposeNode<Self>),
+    VertexInput(VertexInNode<Self>),
 }
 
 impl NodeData<Node> for Node {
@@ -25,6 +28,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.out_value(index),
             Node::BinOp(value) => value.out_value(index),
             Node::Compose(value) => value.out_value(index),
+            Node::Decompose(value) => value.out_value(index),
+            Node::VertexInput(value) => value.out_value(index),
         }
     }
 
@@ -35,6 +40,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.f32_out_value_mut(index),
             Node::BinOp(value) => value.f32_out_value_mut(index),
             Node::Compose(value) => value.f32_out_value_mut(index),
+            Node::Decompose(value) => value.f32_out_value_mut(index),
+            Node::VertexInput(value) => value.f32_out_value_mut(index),
         }
     }
 
@@ -45,6 +52,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.in_value(index, new_value),
             Node::BinOp(value) => value.in_value(index, new_value),
             Node::Compose(value) => value.in_value(index, new_value),
+            Node::Decompose(value) => value.in_value(index, new_value),
+            Node::VertexInput(value) => value.in_value(index, new_value),
         }
     }
 
@@ -55,6 +64,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.title(),
             Node::BinOp(value) => value.title(),
             Node::Compose(value) => value.title(),
+            Node::Decompose(value) => value.title(),
+            Node::VertexInput(value) => value.title(),
         }
     }
 
@@ -65,6 +76,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.inputs(),
             Node::BinOp(value) => value.inputs(),
             Node::Compose(value) => value.inputs(),
+            Node::Decompose(value) => value.inputs(),
+            Node::VertexInput(value) => value.inputs(),
         }
     }
 
@@ -75,6 +88,8 @@ impl NodeData<Node> for Node {
             Node::Vec(value) => value.outputs(),
             Node::BinOp(value) => value.outputs(),
             Node::Compose(value) => value.outputs(),
+            Node::Decompose(value) => value.outputs(),
+            Node::VertexInput(value) => value.outputs(),
         }
     }
 }
@@ -87,6 +102,8 @@ impl NodeView<Node> for Node {
             Node::Vec(value) => value.has_body(),
             Node::BinOp(value) => value.has_body(),
             Node::Compose(value) => value.has_body(),
+            Node::Decompose(value) => value.has_body(),
+            Node::VertexInput(value) => value.has_body(),
         }
     }
 
@@ -97,6 +114,8 @@ impl NodeView<Node> for Node {
             Node::Vec(value) => value.show_body(ui, inputs),
             Node::BinOp(value) => value.show_body(ui, inputs),
             Node::Compose(value) => value.show_body(ui, inputs),
+            Node::Decompose(value) => value.show_body(ui, inputs),
+            Node::VertexInput(value) => value.show_body(ui, inputs),
         }
     }
 }
@@ -108,11 +127,16 @@ impl GraphView<Node> for Node {
             if ui.button("Float").clicked() {
                 result = Some(Node::Float(FloatNode::default()));
             }
-            if ui.button("Vec2").clicked() {
+            if ui.button("Vec").clicked() {
                 result = Some(Node::Vec(VecNode::default()));
             }
         });
-        if ui.button("Output").clicked() {
+        ui.menu_button("Inputs", |ui| {
+            if ui.button("VertexInput").clicked() {
+                result = Some(Node::VertexInput(VertexInNode::default()));
+            }
+        });
+        if ui.button("Outputs").clicked() {
             result = Some(Node::Output(OutputNode::default()));
         }
         ui.menu_button("Operations", |ui| {
@@ -121,6 +145,9 @@ impl GraphView<Node> for Node {
             }
             if ui.button("Compose").clicked() {
                 result = Some(Node::Compose(ComposeNode::default()));
+            }
+            if ui.button("Decompose").clicked() {
+                result = Some(Node::Decompose(DecomposeNode::default()));
             }
         });
 
@@ -131,11 +158,13 @@ impl GraphView<Node> for Node {
 impl NodeCompile<Node, ShaderCompiler, ShaderSection> for Node {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         match self {
-            MathNode::Output(value) => value.out_vars(id, index),
-            MathNode::Float(value) => value.out_vars(id, index),
-            MathNode::Vec(value) => value.out_vars(id, index),
-            MathNode::BinOp(value) => value.out_vars(id, index),
-            MathNode::Compose(value) => value.out_vars(id, index),
+            Node::Output(value) => value.out_vars(id, index),
+            Node::Float(value) => value.out_vars(id, index),
+            Node::Vec(value) => value.out_vars(id, index),
+            Node::BinOp(value) => value.out_vars(id, index),
+            Node::Compose(value) => value.out_vars(id, index),
+            Node::Decompose(value) => value.out_vars(id, index),
+            Node::VertexInput(value) => value.out_vars(id, index),
         }
     }
 
@@ -145,11 +174,13 @@ impl NodeCompile<Node, ShaderCompiler, ShaderSection> for Node {
         input_vars: &Vec<Option<NodeParam>>,
     ) -> Vec<CodeFragment<ShaderSection>> {
         match self {
-            MathNode::Output(value) => value.code(id, input_vars),
-            MathNode::Float(value) => value.code(id, input_vars),
-            MathNode::Vec(value) => value.code(id, input_vars),
-            MathNode::BinOp(value) => value.code(id, input_vars),
-            MathNode::Compose(value) => value.code(id, input_vars),
+            Node::Output(value) => value.code(id, input_vars),
+            Node::Float(value) => value.code(id, input_vars),
+            Node::Vec(value) => value.code(id, input_vars),
+            Node::BinOp(value) => value.code(id, input_vars),
+            Node::Compose(value) => value.code(id, input_vars),
+            Node::Decompose(value) => value.code(id, input_vars),
+            Node::VertexInput(value) => value.code(id, input_vars),
         }
     }
 }

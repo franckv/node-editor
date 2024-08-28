@@ -9,6 +9,10 @@ use node_model::{NodeData, NodeValueType};
 
 use crate::utils::Sort;
 
+pub trait ScriptGenerator<S> {
+    fn script(fragments: &Vec<CodeFragment<S>>) -> String;
+}
+
 pub struct GraphCompiler<G, S> {
     compiler_type: PhantomData<G>,
     section_type: PhantomData<S>,
