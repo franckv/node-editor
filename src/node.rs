@@ -43,8 +43,8 @@ pub enum NodeValue {
 }
 
 impl NodeValue {
-    fn format_float(value: f32) -> String {
-        format!("{}", (value * 100.).round() / 100.)
+    pub fn format_float(value: f32) -> String {
+        format!("{:?}", (value * 100.).round() / 100.)
     }
 
     pub fn to_string(&self) -> String {

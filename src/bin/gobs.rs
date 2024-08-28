@@ -16,12 +16,16 @@ use gobs::{
     ui::UIRenderer,
 };
 
-use node_editor::{compiler::ShaderCompiler, graph::MathNode, ui::NodeUI};
+use node_editor::{
+    compiler::{ShaderCompiler, ShaderSection},
+    graph::MathNode,
+    ui::NodeUI,
+};
 
 struct App {
     graph: FrameGraph,
     ui: UIRenderer,
-    node_ui: NodeUI<MathNode, ShaderCompiler>,
+    node_ui: NodeUI<MathNode, ShaderCompiler, ShaderSection>,
 }
 
 impl Run for App {

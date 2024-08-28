@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fmt::Debug, fs};
 
 use egui_snarl::{ui::SnarlStyle, Snarl};
 
@@ -9,14 +9,14 @@ use crate::{
     view::NodeViewer,
 };
 
-pub struct NodeUI<T, G> {
+pub struct NodeUI<T, G, S> {
     snarl: Snarl<T>,
     style: SnarlStyle,
-    compiler: GraphCompiler<G>,
+    compiler: GraphCompiler<G, S>,
     show_script: bool,
 }
 
-impl<T, G> Default for NodeUI<T, G> {
+impl<T, G, S> Default for NodeUI<T, G, S> {
     fn default() -> Self {
         Self {
             snarl: Default::default(),
@@ -30,12 +30,13 @@ impl<T, G> Default for NodeUI<T, G> {
 impl<
         T: NodeView<T>
             + GraphView<T>
-            + NodeCompile<T, G>
+            + NodeCompile<T, G, S>
             + Clone
             + serde::Serialize
             + for<'a> serde::Deserialize<'a>,
         G,
-    > NodeUI<T, G>
+        S: Debug,
+    > NodeUI<T, G, S>
 {
     pub fn draw_ui(&mut self, ectx: &egui::Context) {
         egui::CentralPanel::default().show(ectx, |ui| {
@@ -52,9 +53,13 @@ impl<
         egui::Window::new("Script")
             .open(&mut self.show_script)
             .show(ectx, |ui| {
-                let mut code = self.compiler.compile(&self.snarl);
+                let code = self.compiler.compile(&self.snarl);
 
-                ui.text_edit_multiline(&mut code);
+                let mut script = String::from("");
+                for fragment in code {
+                    script += &format!("[{:?}] {}\n", &fragment.section, &fragment.code);
+                }
+                ui.text_edit_multiline(&mut script);
             });
     }
 

@@ -1,4 +1,4 @@
-use crate::compiler::{NodeCompile, NodeParam};
+use crate::compiler::{CodeFragment, NodeCompile, NodeParam, ShaderCompiler, ShaderSection};
 use crate::graph::GraphView;
 use crate::node::{BinOpNode, ComposeNode, Connector, FloatNode, OutputNode, Vec2Node};
 use crate::node::{NodeValue, NodeView};
@@ -123,7 +123,7 @@ impl GraphView<Node> for Node {
     }
 }
 
-impl<G> NodeCompile<Node, G> for Node {
+impl NodeCompile<Node, ShaderCompiler, ShaderSection> for Node {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam {
         match self {
             MathNode::Output(value) => value.out_vars(id, index),
@@ -134,7 +134,11 @@ impl<G> NodeCompile<Node, G> for Node {
         }
     }
 
-    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String {
+    fn code(
+        &self,
+        id: usize,
+        input_vars: &Vec<Option<NodeParam>>,
+    ) -> Vec<CodeFragment<ShaderSection>> {
         match self {
             MathNode::Output(value) => value.code(id, input_vars),
             MathNode::Float(value) => value.code(id, input_vars),

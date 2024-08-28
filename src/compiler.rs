@@ -1,6 +1,6 @@
 mod shader;
 
-pub use shader::ShaderCompiler;
+pub use shader::{ShaderCompiler, ShaderSection};
 
 use std::collections::HashMap;
 use std::marker::PhantomData;
@@ -9,23 +9,29 @@ use egui_snarl::Snarl;
 
 use crate::node::{NodeValueType, NodeView};
 use crate::utils::sort;
-
-pub struct GraphCompiler<G> {
+pub struct GraphCompiler<G, S> {
     compiler_type: PhantomData<G>,
+    section_type: PhantomData<S>,
 }
 
-impl<G> Default for GraphCompiler<G> {
+impl<G, S> Default for GraphCompiler<G, S> {
     fn default() -> Self {
         Self {
             compiler_type: Default::default(),
+            section_type: Default::default(),
         }
     }
 }
 
-impl<G> GraphCompiler<G> {
-    pub fn compile<T: NodeView<T> + NodeCompile<T, G>>(&self, snarl: &Snarl<T>) -> String {
-        let mut code = String::from("");
-
+impl<G, S> GraphCompiler<G, S> {
+    pub fn compile<T: NodeView<T> + NodeCompile<T, G, S>>(
+        &self,
+        snarl: &Snarl<T>,
+    ) -> Vec<CodeFragment<S>>
+    where
+        Self: Sized,
+    {
+        let mut code = Vec::new();
         let mut index_mapping = HashMap::new();
 
         let nodes = snarl
@@ -78,8 +84,7 @@ impl<G> GraphCompiler<G> {
                     inputs.push(None);
                 }
             }
-            code += &node.code(i, &inputs);
-            code += "\n";
+            code.append(&mut node.code(i, &inputs));
         }
 
         code
@@ -91,7 +96,12 @@ pub struct NodeParam {
     pub ty: NodeValueType,
 }
 
-pub trait NodeCompile<T, G> {
+pub struct CodeFragment<S> {
+    pub section: S,
+    pub code: String,
+}
+
+pub trait NodeCompile<T, G, S> {
     fn out_vars(&self, id: usize, index: usize) -> NodeParam;
-    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> String;
+    fn code(&self, id: usize, input_vars: &Vec<Option<NodeParam>>) -> Vec<CodeFragment<S>>;
 }
