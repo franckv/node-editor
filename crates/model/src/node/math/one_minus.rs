@@ -3,8 +3,10 @@ use std::marker::PhantomData;
 use crate::node::{Connector, NodeData, NodeValue, NodeValueType};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct OneMinusNode<T> {
     pub x: f32,
+    #[serde(skip_serializing)]
     node_type: PhantomData<T>,
 }
 

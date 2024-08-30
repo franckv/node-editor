@@ -5,10 +5,12 @@ use glam::{Vec2, Vec3, Vec4};
 use crate::node::{Connector, NodeData, NodeValue, NodeValueType};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct VertexInNode<T> {
     pub color: Vec4,
     pub uv: Vec2,
     pub normal: Vec3,
+    #[serde(skip_serializing)]
     node_type: PhantomData<T>,
 }
 

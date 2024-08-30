@@ -3,12 +3,14 @@ use std::marker::PhantomData;
 use crate::node::{Connector, Dim, NodeData, NodeValue, NodeValueType};
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 pub struct ComposeNode<T> {
     pub x: f32,
     pub y: f32,
     pub z: f32,
     pub w: f32,
     pub dim: Dim,
+    #[serde(skip_serializing)]
     node_type: PhantomData<T>,
 }
 
