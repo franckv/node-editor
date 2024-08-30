@@ -8,10 +8,7 @@ use gobs::{
     },
     gfx::Device,
     render::{
-        context::Context,
-        graph::{FrameGraph, RenderError},
-        pass::PassType,
-        renderable::Renderable,
+        Context, PassType, Renderable, {FrameGraph, RenderError},
     },
     ui::UIRenderer,
 };
@@ -55,12 +52,14 @@ impl Run for App {
 
         self.graph.begin(ctx)?;
 
-        self.graph.render(ctx, &mut |pass, batch| match pass.ty() {
+        self.graph.prepare(ctx, &mut |pass, batch| match pass.ty() {
             PassType::Ui => {
                 self.ui.draw(ctx, pass, batch);
             }
             _ => (),
-        })?;
+        });
+
+        self.graph.render(ctx)?;
 
         self.graph.end(ctx)?;
 
@@ -104,5 +103,5 @@ fn main() {
 
     tracing::info!("Engine start");
 
-    Application::<App>::new("NodeUI", 1024, 768).run();
+    Application::<App>::new("NodeUI", 1024, 768, false).run();
 }
